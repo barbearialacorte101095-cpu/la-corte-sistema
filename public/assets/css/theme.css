@@ -1,0 +1,162 @@
+/* ==========================================================
+   LA CORTE BARBER SHOP — Design System
+   Paleta: verde musgo + prata metálico sobre chumbo quase-preto
+   Assinatura visual: textura de escamas (couro de jacaré) e
+   bordas serrilhadas ("mordida") em elementos de destaque.
+   ========================================================== */
+
+:root {
+  /* Cores base */
+  --void: #08090a;
+  --panel: #101312;
+  --panel-2: #171b19;
+  --panel-border: #232a26;
+
+  /* Verde musgo (jacaré) */
+  --moss-900: #0c2b20;
+  --moss-800: #123a2b;
+  --moss-700: #175939;
+  --moss-500: #2a8c5c;
+  --moss-400: #3fae76;
+  --moss-300: #7fd6a6;
+
+  /* Prata / branco */
+  --silver: #c7cdc9;
+  --silver-dim: #8b938e;
+  --white: #f4f6f5;
+
+  /* Estado */
+  --danger: #b5453f;
+  --danger-soft: #e79c97;
+
+  /* Tipografia */
+  --font-display: "Fjalla One", "Arial Narrow", sans-serif;
+  --font-body: "Work Sans", -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Layout */
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--white);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Textura de escamas (assinatura) ----------
+   Um padrão diamante repetido, sutil, usado em heros e
+   divisores — referência direta às escamas do jacaré da logo. */
+.scute-texture {
+  position: relative;
+  background-color: var(--void);
+  background-image:
+    linear-gradient(135deg, rgba(42,140,92,0.10) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(42,140,92,0.10) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(42,140,92,0.06) 25%, transparent 25%),
+    linear-gradient(315deg, rgba(42,140,92,0.06) 25%, transparent 25%);
+  background-position: 20px 0, 20px 0, 0 0, 0 0;
+  background-size: 40px 40px;
+  background-repeat: repeat;
+}
+
+/* ---------- Borda "mordida" ----------
+   Clip-path serrilhado, referência à arcada do jacaré,
+   usado com moderação em CTAs primárias e no topo de cards. */
+.bite-edge-top {
+  clip-path: polygon(
+    0% 6px, 4% 0, 8% 6px, 12% 0, 16% 6px, 20% 0, 24% 6px, 28% 0,
+    32% 6px, 36% 0, 40% 6px, 44% 0, 48% 6px, 52% 0, 56% 6px, 60% 0,
+    64% 6px, 68% 0, 72% 6px, 76% 0, 80% 6px, 84% 0, 88% 6px, 92% 0,
+    96% 6px, 100% 0, 100% 100%, 0% 100%
+  );
+}
+
+/* ---------- Tipografia utilitária ---------- */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.chrome-text {
+  background: linear-gradient(180deg, #ffffff 0%, #c7cdc9 45%, #8b938e 55%, #ffffff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mono { font-family: var(--font-mono); }
+
+/* ---------- Componentes reutilizáveis ---------- */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--moss-400), var(--moss-700));
+  color: var(--white);
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: none;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+.btn-primary:hover { filter: brightness(1.12); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:focus-visible {
+  outline: 2px solid var(--moss-300);
+  outline-offset: 2px;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--silver);
+}
+.btn-ghost:hover { border-color: var(--moss-500); color: var(--white); }
+.btn-ghost:focus-visible {
+  outline: 2px solid var(--moss-300);
+  outline-offset: 2px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+}
+.pill-pendente { background: rgba(197,168,58,0.15); color: #e0c05e; }
+.pill-confirmado { background: rgba(63,174,118,0.15); color: var(--moss-300); }
+.pill-concluido { background: rgba(139,147,142,0.15); color: var(--silver); }
+.pill-cancelado, .pill-nao_compareceu { background: rgba(181,69,63,0.15); color: var(--danger-soft); }
+
+::selection { background: var(--moss-700); color: var(--white); }
+
+/* Foco visível consistente em toda a aplicação */
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--moss-300);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* Scrollbar discreta, no tom do painel */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--moss-700); }

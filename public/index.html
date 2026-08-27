@@ -1,10 +1,120 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>La Corte Barber Shop</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>La Corte Barber Shop — Agendar horário</title>
+<meta name="description" content="Agende seu horário na La Corte Barber Shop." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/assets/css/theme.css" />
 </head>
 <body>
-    <h1>La Corte Barber Shop - Sistema em construção</h1>
+
+  <!-- Navegação -->
+  <header class="border-b border-[var(--panel-border)] sticky top-0 bg-[var(--void)]/90 backdrop-blur z-30">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-baseline gap-2">
+        <span class="font-display text-xl chrome-text">LA CORTE</span>
+        <span class="text-[10px] tracking-[0.2em] text-[var(--silver-dim)] uppercase">Barber Shop</span>
+      </div>
+      <a href="#agendar" class="btn-primary rounded-lg px-4 py-2 text-sm">Agendar</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="scute-texture border-b border-[var(--panel-border)]">
+    <div class="max-w-5xl mx-auto px-6 py-20 text-center">
+      <p class="mono text-xs tracking-[0.3em] text-[var(--moss-300)] uppercase mb-4">Corte com precisão de navalha</p>
+      <h1 class="font-display text-5xl md:text-6xl chrome-text leading-tight">
+        Cada corte,<br />uma marca registrada.
+      </h1>
+      <p class="text-[var(--silver)] mt-6 max-w-md mx-auto">
+        Escolha o serviço, o barbeiro e o horário. Confirmação na hora, sem complicação.
+      </p>
+    </div>
+  </section>
+
+  <!-- Fluxo de agendamento -->
+  <main id="agendar" class="max-w-3xl mx-auto px-6 py-16">
+
+    <!-- Trilha de passos -->
+    <ol id="trilha-passos" class="flex justify-between mono text-xs uppercase tracking-wide mb-10">
+      <li data-trilha="1" class="text-white">01 · Serviço</li>
+      <li data-trilha="2" class="text-[var(--silver-dim)]">02 · Barbeiro</li>
+      <li data-trilha="3" class="text-[var(--silver-dim)]">03 · Horário</li>
+      <li data-trilha="4" class="text-[var(--silver-dim)]">04 · Confirmar</li>
+    </ol>
+
+    <div id="mensagem-erro" class="hidden card border-[var(--danger)] text-[var(--danger-soft)] px-4 py-3 mb-6 text-sm"></div>
+
+    <!-- Passo 1: serviço -->
+    <div data-passo="1">
+      <h2 class="font-display text-2xl mb-6">Escolha o serviço</h2>
+      <div id="lista-servicos" class="grid sm:grid-cols-2 gap-4"></div>
+    </div>
+
+    <!-- Passo 2: barbeiro -->
+    <div data-passo="2" class="hidden">
+      <h2 class="font-display text-2xl mb-6">Escolha o barbeiro</h2>
+      <div id="lista-barbeiros" class="grid sm:grid-cols-2 gap-4"></div>
+      <button class="btn-ghost rounded-lg px-4 py-2 text-sm mt-6" onclick="irParaPasso(1)">← Voltar</button>
+    </div>
+
+    <!-- Passo 3: data e horário -->
+    <div data-passo="3" class="hidden">
+      <h2 class="font-display text-2xl mb-6">Escolha data e horário</h2>
+      <label class="block text-sm text-[var(--silver-dim)] mb-2">Data</label>
+      <input type="date" id="input-data" class="card w-full px-4 py-3 mono text-white bg-transparent mb-6" />
+      <div id="grade-horarios" class="grid grid-cols-3 sm:grid-cols-4 gap-3"></div>
+      <button class="btn-ghost rounded-lg px-4 py-2 text-sm mt-6" onclick="irParaPasso(2)">← Voltar</button>
+    </div>
+
+    <!-- Passo 4: dados + confirmação -->
+    <div data-passo="4" class="hidden">
+      <h2 class="font-display text-2xl mb-6">Confirme seu agendamento</h2>
+
+      <div id="resumo-agendamento" class="card p-5 mb-8"></div>
+
+      <form id="form-dados-cliente" class="space-y-4">
+        <div>
+          <label class="block text-sm text-[var(--silver-dim)] mb-2">Nome completo</label>
+          <input required name="nome" type="text" class="card w-full px-4 py-3 bg-transparent text-white" />
+        </div>
+        <div>
+          <label class="block text-sm text-[var(--silver-dim)] mb-2">Telefone (WhatsApp)</label>
+          <input required name="telefone" type="tel" placeholder="21999999999" class="card w-full px-4 py-3 bg-transparent text-white" />
+        </div>
+        <div>
+          <label class="block text-sm text-[var(--silver-dim)] mb-2">E-mail (opcional)</label>
+          <input name="email" type="email" class="card w-full px-4 py-3 bg-transparent text-white" />
+        </div>
+        <div>
+          <label class="block text-sm text-[var(--silver-dim)] mb-2">Observações (opcional)</label>
+          <textarea name="observacoes" rows="2" class="card w-full px-4 py-3 bg-transparent text-white"></textarea>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" class="btn-ghost rounded-lg px-4 py-3 text-sm" onclick="irParaPasso(3)">← Voltar</button>
+          <button type="submit" class="btn-primary rounded-lg px-6 py-3 text-sm flex-1 bite-edge-top">Confirmar agendamento</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tela de sucesso -->
+    <div id="tela-sucesso" class="hidden text-center py-16">
+      <p class="text-5xl mb-4">✓</p>
+      <h2 class="font-display text-2xl chrome-text mb-2">Agendamento confirmado</h2>
+      <p class="text-[var(--silver-dim)]">Te esperamos na La Corte. Qualquer mudança, chame no WhatsApp.</p>
+    </div>
+  </main>
+
+  <footer class="border-t border-[var(--panel-border)] py-8 text-center">
+    <p class="text-xs text-[var(--silver-dim)] mono">LA CORTE BARBER SHOP</p>
+  </footer>
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/booking.js"></script>
 </body>
 </html>
