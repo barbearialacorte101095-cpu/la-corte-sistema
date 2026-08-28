@@ -6,7 +6,6 @@ from uuid import UUID
 
 router = APIRouter()
 
-# Contrato corrigido: servico_id agora aceita UUID
 class AgendamentoCliente(BaseModel):
     cliente_nome: str
     cliente_telefone: str
@@ -15,53 +14,74 @@ class AgendamentoCliente(BaseModel):
 
 @router.get("")
 async def listar_agendamentos(data: str = None):
-    pool = await get_pool()
-    async with pool.connection() as conn:
-        async with conn.cursor() as cur:
-            if data:
-                await cur.execute(
-                    "SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos WHERE DATE(data_hora_inicio) = %s ORDER BY data_hora_inicio",
-                    (data,)
-                )
-            else:
-                await cur.execute("SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos ORDER BY data_hora_inicio")
-            
-            rows = await cur.fetchall()
-            agendamentos = []
-            for r in rows:
-                agendamentos.append({
-                    "id": r[0],
-                    "servico_id": r[1],
-                    "data_hora_inicio": r[2].isoformat() if r[2] else None,
-                    "status": r[3],
-                    "cliente_nome": r[4] if r[4] else "Cliente",
-                    "cliente_telefone": r[5] if r[5] else ""
-                })
-            return agendamentos
+    try:
+        pool = await get_pool()
+        async with pool.connection() as conn:
+            async with conn.cursor() as cur:
+                if data:
+                    # Forma mais segura de comparar datas no PostgreSQL (::date)
+                    await cur.execute(
+                        "SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos WHERE data_hora_inicio::date = %s::date ORDER BY data_hora_inicio",
+                        (data,)
+                    )
+                else:
+                    await cur.execute("SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos ORDER BY data_hora_inicio")
+                
+                rows = await cur.fetchall()
+                agendamentos = []
+                for r in rows:
+                    # Garantindo que a data seja lida corretamente mesmo se o banco devolver como texto
+                    val_data = r[2]
+                    if isinstance(val_data, str):
+                        val_data = datetime.fromisoformat(val_data.replace('Z', '+00:00'))
+                        
+                    agendamentos.append({
+                        "id": str(r[0]),
+                        "servico_id": str(r[1]) if r[1] else None,
+                        "data_hora_inicio": val_data.isoformat() if val_data else None,
+                        "status": r[3],
+                        "cliente_nome": r[4] if r[4] else "Cliente",
+                        "cliente_telefone": r[5] if r[5] else ""
+                    })
+                return agendamentos
+    except Exception as e:
+        # Repassa o erro exato para não gerar um apagão silencioso
+        raise HTTPException(status_code=500, detail=f"Erro ao listar: {str(e)}")
 
 @router.get("/disponibilidade")
 async def verificar_disponibilidade(data: str):
-    pool = await get_pool()
-    async with pool.connection() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(
-                "SELECT data_hora_inicio FROM agendamentos WHERE DATE(data_hora_inicio) = %s AND status != 'cancelado'",
-                (data,)
-            )
-            rows = await cur.fetchall()
-            horarios_ocupados = [r[0].strftime("%H:%M") for r in rows if r[0]]
-            
-            horarios_disponiveis = []
-            hora_atual = datetime.strptime("09:00", "%H:%M")
-            hora_fim = datetime.strptime("19:30", "%H:%M")
-            
-            while hora_atual <= hora_fim:
-                str_hora = hora_atual.strftime("%H:%M")
-                if str_hora not in horarios_ocupados:
-                    horarios_disponiveis.append(str_hora)
-                hora_atual += timedelta(minutes=30)
+    try:
+        pool = await get_pool()
+        async with pool.connection() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
+                    "SELECT data_hora_inicio FROM agendamentos WHERE data_hora_inicio::date = %s::date AND status != 'cancelado'",
+                    (data,)
+                )
+                rows = await cur.fetchall()
                 
-            return horarios_disponiveis
+                horarios_ocupados = []
+                for r in rows:
+                    if r[0]:
+                        val = r[0]
+                        if isinstance(val, str):
+                            val = datetime.fromisoformat(val.replace('Z', '+00:00'))
+                        horarios_ocupados.append(val.strftime("%H:%M"))
+                
+                # Gera lista de 30 em 30 min
+                horarios_disponiveis = []
+                hora_atual = datetime.strptime("09:00", "%H:%M")
+                hora_fim = datetime.strptime("19:30", "%H:%M")
+                
+                while hora_atual <= hora_fim:
+                    str_hora = hora_atual.strftime("%H:%M")
+                    if str_hora not in horarios_ocupados:
+                        horarios_disponiveis.append(str_hora)
+                    hora_atual += timedelta(minutes=30)
+                    
+                return horarios_disponiveis
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro na disponibilidade: {str(e)}")
 
 @router.post("")
 async def criar_agendamento(dados: AgendamentoCliente):
@@ -92,5 +112,4 @@ async def criar_agendamento(dados: AgendamentoCliente):
             await conn.commit()
         return {"mensagem": "Agendamento confirmado!"}
     except Exception as e:
-        # Se falhar no banco, devolve o erro organizado para o site
         raise HTTPException(status_code=500, detail=str(e))
