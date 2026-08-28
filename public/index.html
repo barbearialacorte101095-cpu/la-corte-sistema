@@ -77,7 +77,6 @@
                     <option value="" disabled selected>Carregando serviços...</option>
                 </select>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-verde-destaque text-xs uppercase mb-2 font-bold">Data</label>
@@ -85,8 +84,11 @@
                 </div>
                 <div>
                     <label class="block text-verde-destaque text-xs uppercase mb-2 font-bold">Horário</label>
-                    <input type="time" id="cliente-hora" required min="09:00" max="20:00" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:border-verde-destaque focus:outline-none">
+                    <select id="cliente-hora" required class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:border-verde-destaque focus:outline-none disabled:opacity-50" disabled>
+                        <option value="" disabled selected>Selecione uma data primeiro</option>
+                    </select>
                 </div>
+            </div>
             </div>
 
             <button type="submit" class="w-full bg-verde-destaque hover:bg-green-600 text-white font-bold py-4 rounded uppercase tracking-widest transition-colors mt-4">
@@ -138,7 +140,7 @@
     <!-- LÓGICA DO CLIENTE (NÃO APAGAR) -->
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Puxa os serviços do banco e coloca no select
+            // 1. Puxa os serviços do banco
             try {
                 const res = await fetch('/api/servicos');
                 const servicos = await res.json();
@@ -150,16 +152,45 @@
                         select.innerHTML += `<option value="${s.id}">${s.nome} - R$ ${Number(s.preco).toFixed(2).replace('.', ',')}</option>`;
                     });
                 }
-            } catch(e) {
-                console.error("Erro ao carregar serviços", e);
-            }
+            } catch(e) { console.error(e); }
 
-            // 2. Envia o agendamento para a API
+            // 2. Trava dias no passado e busca os horários livres
+            const dataInput = document.getElementById('cliente-data');
+            const horaSelect = document.getElementById('cliente-hora');
+            
+            // Impede selecionar ontem ou antes
+            dataInput.min = new Date().toISOString().split('T')[0];
+
+            dataInput.addEventListener('change', async (e) => {
+                const dataEscolhida = e.target.value;
+                horaSelect.innerHTML = '<option value="" disabled selected>Buscando horários livres...</option>';
+                horaSelect.disabled = true;
+
+                try {
+                    const res = await fetch(`/api/agendamentos/disponibilidade?data=${dataEscolhida}`);
+                    const horarios = await res.json();
+
+                    if (horarios.length === 0) {
+                        horaSelect.innerHTML = '<option value="" disabled selected>Nenhum horário livre</option>';
+                    } else {
+                        horaSelect.innerHTML = '<option value="" disabled selected>Escolha um horário...</option>';
+                        horarios.forEach(h => {
+                            horaSelect.innerHTML += `<option value="${h}">${h}</option>`;
+                        });
+                        horaSelect.disabled = false; // Libera o campo
+                    }
+                } catch (err) {
+                    horaSelect.innerHTML = '<option value="" disabled selected>Erro ao carregar</option>';
+                }
+            });
+
+            // 3. Envia o Agendamento
             const form = document.getElementById('form-agendamento-cliente');
             if(form) {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const btn = e.target.querySelector('button[type="submit"]');
+                    const textoOriginal = btn.innerHTML;
                     btn.innerHTML = 'Processando...';
 
                     const data = document.getElementById('cliente-data').value;
@@ -168,7 +199,7 @@
                     const payload = {
                         cliente_nome: document.getElementById('cliente-nome').value,
                         cliente_telefone: document.getElementById('cliente-telefone').value,
-                        servico_id: document.getElementById('cliente-servico').value,
+                        servico_id: parseInt(document.getElementById('cliente-servico').value),
                         data_hora_inicio: `${data}T${hora}:00`
                     };
 
@@ -179,14 +210,19 @@
                             body: JSON.stringify(payload)
                         });
                         
-                        if(!res.ok) throw new Error("Erro na API");
+                        if(!res.ok) {
+                            const errData = await res.json();
+                            throw new Error(errData.detail || "Erro na API");
+                        }
                         
-                        alert("Agendamento solicitado com sucesso! Você já aparece na nossa fila.");
+                        alert("Agendamento confirmado com sucesso! Te esperamos no horário marcado.");
                         form.reset();
+                        horaSelect.disabled = true;
+                        horaSelect.innerHTML = '<option value="" disabled selected>Selecione uma data primeiro</option>';
                     } catch(err) {
-                        alert("Ocorreu um erro ao agendar. Por favor, chame direto no WhatsApp.");
+                        alert("Erro ao agendar: " + err.message);
                     } finally {
-                        btn.innerHTML = 'Confirmar Agendamento';
+                        btn.innerHTML = textoOriginal;
                     }
                 });
             }

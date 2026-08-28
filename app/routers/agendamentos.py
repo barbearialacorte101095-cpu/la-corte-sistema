@@ -1,184 +1,98 @@
-from datetime import date, datetime, timedelta
-from uuid import UUID
-
-from fastapi import APIRouter, HTTPException, Query
-
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from datetime import datetime, timedelta
 from app.core.database import get_pool
-from app.models.schemas import Agendamento, AgendamentoCreate, AgendamentoStatusUpdate
 
 router = APIRouter()
 
+# Contrato exato que o site vai enviar
+class AgendamentoCliente(BaseModel):
+    cliente_nome: str
+    cliente_telefone: str
+    servico_id: int
+    data_hora_inicio: datetime
 
-@router.get("", response_model=list[dict])
-async def listar_agendamentos(
-    data: date | None = Query(None, description="Filtra pela data (YYYY-MM-DD)"),
-    barbeiro_id: UUID | None = None,
-):
+@router.get("")
+async def listar_agendamentos(data: str = None):
     pool = await get_pool()
     async with pool.connection() as conn:
         async with conn.cursor() as cur:
-            filtros = []
-            params: list = []
-
             if data:
-                filtros.append("a.data_hora_inicio::date = %s")
-                params.append(data)
-            if barbeiro_id:
-                filtros.append("a.barbeiro_id = %s")
-                params.append(barbeiro_id)
-
-            where = f"WHERE {' AND '.join(filtros)}" if filtros else ""
-
-            await cur.execute(
-                f"""
-                SELECT
-                    a.id, a.data_hora_inicio, a.data_hora_fim, a.status, a.observacoes,
-                    c.nome AS cliente_nome, c.telefone AS cliente_telefone,
-                    b.nome AS barbeiro_nome,
-                    s.nome AS servico_nome, s.preco AS servico_preco
-                FROM agendamentos a
-                JOIN clientes c ON c.id = a.cliente_id
-                JOIN barbeiros b ON b.id = a.barbeiro_id
-                JOIN servicos s ON s.id = a.servico_id
-                {where}
-                ORDER BY a.data_hora_inicio
-                """,
-                params,
-            )
-            return await cur.fetchall()
-
-
-@router.post("", response_model=Agendamento, status_code=201)
-async def criar_agendamento(dados: AgendamentoCreate):
-    pool = await get_pool()
-    async with pool.connection() as conn:
-        async with conn.cursor() as cur:
-            # Busca a duração do serviço para calcular o horário de término
-            await cur.execute(
-                "SELECT duracao_minutos FROM servicos WHERE id = %s AND ativo = TRUE",
-                (dados.servico_id,),
-            )
-            servico = await cur.fetchone()
-            if not servico:
-                raise HTTPException(404, "Serviço não encontrado ou inativo")
-
-            data_hora_fim = dados.data_hora_inicio + timedelta(
-                minutes=servico["duracao_minutos"]
-            )
-
-            # Upsert simples de cliente por telefone
-            await cur.execute(
-                """
-                INSERT INTO clientes (nome, telefone, email)
-                VALUES (%s, %s, %s)
-                ON CONFLICT (telefone) DO UPDATE SET nome = EXCLUDED.nome
-                RETURNING id
-                """,
-                (dados.cliente_nome, dados.cliente_telefone, dados.cliente_email),
-            )
-            cliente = await cur.fetchone()
-
-            try:
                 await cur.execute(
-                    """
-                    INSERT INTO agendamentos
-                        (cliente_id, barbeiro_id, servico_id, data_hora_inicio,
-                         data_hora_fim, observacoes)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING *
-                    """,
-                    (
-                        cliente["id"],
-                        dados.barbeiro_id,
-                        dados.servico_id,
-                        dados.data_hora_inicio,
-                        data_hora_fim,
-                        dados.observacoes,
-                    ),
+                    "SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos WHERE DATE(data_hora_inicio) = %s ORDER BY data_hora_inicio",
+                    (data,)
                 )
-            except Exception as exc:
-                # Violação da constraint de exclusão (sem_conflito_horario)
-                if "sem_conflito_horario" in str(exc):
-                    raise HTTPException(
-                        409, "Esse barbeiro já tem um horário marcado nesse intervalo"
-                    )
-                raise
+            else:
+                await cur.execute("SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos ORDER BY data_hora_inicio")
+            
+            rows = await cur.fetchall()
+            
+            # Montando a resposta para o Javascript
+            agendamentos = []
+            for r in rows:
+                agendamentos.append({
+                    "id": r[0],
+                    "servico_id": r[1],
+                    "data_hora_inicio": r[2].isoformat() if r[2] else None,
+                    "status": r[3],
+                    "cliente_nome": r[4] if r[4] else "Cliente",
+                    "cliente_telefone": r[5] if r[5] else ""
+                })
+            return agendamentos
 
-            return await cur.fetchone()
-
-
-@router.patch("/{agendamento_id}/status", response_model=Agendamento)
-async def atualizar_status(agendamento_id: UUID, dados: AgendamentoStatusUpdate):
+@router.get("/disponibilidade")
+async def verificar_disponibilidade(data: str):
     pool = await get_pool()
     async with pool.connection() as conn:
         async with conn.cursor() as cur:
+            # Busca os horários que já estão ocupados neste dia
             await cur.execute(
-                "UPDATE agendamentos SET status = %s WHERE id = %s RETURNING *",
-                (dados.status, agendamento_id),
+                "SELECT data_hora_inicio FROM agendamentos WHERE DATE(data_hora_inicio) = %s AND status != 'cancelado'",
+                (data,)
             )
-            row = await cur.fetchone()
-            if not row:
-                raise HTTPException(404, "Agendamento não encontrado")
-            return row
+            rows = await cur.fetchall()
+            horarios_ocupados = [r[0].strftime("%H:%M") for r in rows if r[0]]
+            
+            # Gera os blocos de 30 minutos (das 09:00 às 19:30)
+            horarios_disponiveis = []
+            hora_atual = datetime.strptime("09:00", "%H:%M")
+            hora_fim = datetime.strptime("19:30", "%H:%M")
+            
+            while hora_atual <= hora_fim:
+                str_hora = hora_atual.strftime("%H:%M")
+                # Só adiciona na lista se não estiver ocupado
+                if str_hora not in horarios_ocupados:
+                    horarios_disponiveis.append(str_hora)
+                hora_atual += timedelta(minutes=30)
+                
+            return horarios_disponiveis
 
-
-@router.get("/disponibilidade", response_model=list[str])
-async def horarios_disponiveis(
-    barbeiro_id: UUID, servico_id: UUID, data: date
-):
-    """Retorna os horários (HH:MM) livres para um barbeiro em um dia,
-    considerando a duração do serviço e os agendamentos já existentes."""
+@router.post("")
+async def criar_agendamento(dados: AgendamentoCliente):
     pool = await get_pool()
     async with pool.connection() as conn:
         async with conn.cursor() as cur:
+            # Trava de segurança extra contra conflitos
             await cur.execute(
-                "SELECT duracao_minutos FROM servicos WHERE id = %s", (servico_id,)
+                "SELECT id FROM agendamentos WHERE data_hora_inicio = %s AND status != 'cancelado'",
+                (dados.data_hora_inicio,)
             )
-            servico = await cur.fetchone()
-            if not servico:
-                raise HTTPException(404, "Serviço não encontrado")
-            duracao = timedelta(minutes=servico["duracao_minutos"])
+            if await cur.fetchone():
+                raise HTTPException(status_code=400, detail="Este horário acabou de ser reservado.")
 
-            dia_semana = data.weekday()
-            dia_semana = (dia_semana + 1) % 7  # Python: seg=0 -> banco: dom=0
-
+            # Salva no banco de dados
             await cur.execute(
                 """
-                SELECT hora_inicio, hora_fim FROM horarios_disponiveis
-                WHERE barbeiro_id = %s AND dia_semana = %s
+                INSERT INTO agendamentos (servico_id, data_hora_inicio, data_hora_fim, status, cliente_nome, cliente_telefone)
+                VALUES (%s, %s, %s, 'pendente', %s, %s)
                 """,
-                (barbeiro_id, dia_semana),
+                (
+                    dados.servico_id, 
+                    dados.data_hora_inicio, 
+                    dados.data_hora_inicio + timedelta(minutes=30), 
+                    dados.cliente_nome, 
+                    dados.cliente_telefone
+                )
             )
-            janelas = await cur.fetchall()
-            if not janelas:
-                return []
-
-            await cur.execute(
-                """
-                SELECT data_hora_inicio, data_hora_fim FROM agendamentos
-                WHERE barbeiro_id = %s
-                  AND data_hora_inicio::date = %s
-                  AND status NOT IN ('cancelado', 'nao_compareceu')
-                """,
-                (barbeiro_id, data),
-            )
-            ocupados = await cur.fetchall()
-
-            livres: list[str] = []
-            slot_minutos = 30
-
-            for janela in janelas:
-                atual = datetime.combine(data, janela["hora_inicio"])
-                fim_janela = datetime.combine(data, janela["hora_fim"])
-
-                while atual + duracao <= fim_janela:
-                    fim_slot = atual + duracao
-                    conflita = any(
-                        atual < o["data_hora_fim"] and fim_slot > o["data_hora_inicio"]
-                        for o in ocupados
-                    )
-                    if not conflita:
-                        livres.append(atual.strftime("%H:%M"))
-                    atual += timedelta(minutes=slot_minutos)
-
-            return livres
+        await conn.commit() # Efetiva o agendamento
+        return {"mensagem": "Agendamento confirmado!"}
