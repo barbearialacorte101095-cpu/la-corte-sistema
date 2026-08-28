@@ -169,3 +169,51 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarAgendaDoDia();
   carregarTransacoes();
 });
+// ====== LÓGICA DO FRENTE DE CAIXA (PDV) ======
+
+const formPdv = document.getElementById('form-pdv');
+if (formPdv) {
+    formPdv.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+
+        // 1. Captura os valores selecionados no formulário
+        const selectServico = document.getElementById('pdv-servico');
+        const selectPagamento = document.getElementById('pdv-pagamento');
+        
+        const valorServico = parseFloat(selectServico.value);
+        // Pega o texto da opção selecionada (ex: "Corte Degradê (Fade) - R$ 60,00")
+        const nomeServicoText = selectServico.options[selectServico.selectedIndex].text;
+        // Limpa o texto para mandar apenas o nome do corte pro banco
+        const nomeServico = nomeServicoText.split(' - ')[0]; 
+
+        const metodoPagamento = selectPagamento.value;
+
+        try {
+            // Muda o texto do botão para indicar carregamento
+            const btnSubmit = ev.target.querySelector('button[type="submit"]');
+            const textoOriginal = btnSubmit.innerHTML;
+            btnSubmit.innerHTML = 'Processando...';
+            btnSubmit.disabled = true;
+
+            // 2. Envia a transação de entrada para a API usando o helper do Claude
+            await api.post("/financeiro/transacoes", {
+                tipo: "entrada",
+                categoria: metodoPagamento,
+                valor: valorServico,
+                descricao: nomeServico
+            });
+
+            // 3. Limpa o formulário e recarrega o Faturamento do topo da página
+            formPdv.reset();
+            await carregarResumo(); 
+            
+            // Restaura o botão
+            btnSubmit.innerHTML = textoOriginal;
+            btnSubmit.disabled = false;
+
+        } catch (erro) {
+            console.error(erro);
+            alert("Erro ao registrar a venda. Tente novamente.");
+        }
+    });
+}

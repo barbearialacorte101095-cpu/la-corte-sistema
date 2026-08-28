@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Corte Barber Shop - Admin</title>
+    <title>La Corte Barber Shop - PDV</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -28,39 +28,77 @@
             <h1 class="text-3xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-prata">
                 LA CORTE
             </h1>
-            <p class="text-verde-corte font-semibold tracking-widest text-sm mt-1">BARBER SHOP</p>
+            <p class="text-verde-corte font-semibold tracking-widest text-sm mt-1">FRENTE DE CAIXA</p>
         </div>
-        <div class="text-prata text-sm">
-            Painel Administrativo
+        <div>
+            <button onclick="fazerLogout()" class="text-prata hover:text-white text-sm uppercase tracking-wider transition-colors">
+                Sair / Fechar Caixa
+            </button>
         </div>
     </header>
 
-    <!-- Grid de Cards Financeiros -->
-    <main class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <!-- Card 1: Faturamento do Dia -->
-        <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-corte shadow-lg">
-            <h2 class="text-prata text-sm uppercase tracking-wider mb-2">Faturamento (Hoje)</h2>
-            <div class="flex items-center justify-between">
-                <span id="valor-faturamento" class="text-3xl font-bold text-gray-500">Carregando...</span>
+    <main class="max-w-5xl mx-auto">
+        <!-- Grid de Cards Financeiros -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Card 1: Faturamento do Dia -->
+            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-corte shadow-lg">
+                <h2 class="text-prata text-sm uppercase tracking-wider mb-2">Faturamento (Hoje)</h2>
+                <div class="flex items-center justify-between">
+                    <span id="valor-faturamento" class="text-3xl font-bold text-gray-500">Carregando...</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Cortes Realizados -->
+            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-corte shadow-lg">
+                <h2 class="text-prata text-sm uppercase tracking-wider mb-2">Cortes Realizados (Hoje)</h2>
+                <div class="flex items-center justify-between">
+                    <span id="qtd-cortes" class="text-3xl font-bold text-gray-500">...</span>
+                    <span id="qtd-agendados" class="text-prata font-bold">...</span>
+                </div>
             </div>
         </div>
 
-        <!-- Card 2: Cortes Realizados -->
-        <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-corte shadow-lg">
-            <h2 class="text-prata text-sm uppercase tracking-wider mb-2">Cortes Realizados</h2>
-            <div class="flex items-center justify-between">
-                <span id="qtd-cortes" class="text-3xl font-bold text-gray-500">...</span>
-                <span id="qtd-agendados" class="text-prata font-bold">...</span>
-            </div>
-        </div>
+        <!-- FRENTE DE CAIXA (NOVA VENDA) -->
+        <div class="bg-chumbo-claro p-6 rounded-lg border-t-4 border-verde-corte shadow-lg">
+            <h2 class="text-prata font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
+                <span>+</span> Registrar Nova Venda
+            </h2>
+            
+            <form id="form-pdv" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                
+                <!-- Seleção do Serviço -->
+                <div class="md:col-span-2">
+                    <label class="block text-prata text-xs uppercase mb-2">Serviço Realizado</label>
+                    <select id="pdv-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-corte" required>
+                        <option value="" disabled selected>Selecione um serviço...</option>
+                        <option value="45.00">Corte Social - R$ 45,00</option>
+                        <option value="50.00">Barba Desenhada - R$ 50,00</option>
+                        <option value="60.00">Corte Degradê (Fade) - R$ 60,00</option>
+                        <option value="65.00">Corte + Navalha - R$ 65,00</option>
+                        <option value="70.00">Barboterapia - R$ 70,00</option>
+                        <option value="100.00">Combo: Corte + Barba - R$ 100,00</option>
+                        <option value="120.00">Combo Completo - R$ 120,00</option>
+                    </select>
+                </div>
 
-        <!-- Card 3: Comissões Pendentes -->
-        <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-red-900 shadow-lg">
-            <h2 class="text-prata text-sm uppercase tracking-wider mb-2">Comissões (A Pagar)</h2>
-            <div class="flex items-center justify-between">
-                <span id="valor-comissoes" class="text-3xl font-bold text-gray-500">Carregando...</span>
-            </div>
+                <!-- Método de Pagamento -->
+                <div>
+                    <label class="block text-prata text-xs uppercase mb-2">Pagamento</label>
+                    <select id="pdv-pagamento" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-corte" required>
+                        <option value="pix">Pix</option>
+                        <option value="cartao_credito">Cartão de Crédito</option>
+                        <option value="cartao_debito">Cartão de Débito</option>
+                        <option value="dinheiro">Dinheiro</option>
+                    </select>
+                </div>
+
+                <!-- Botão Receber -->
+                <div>
+                    <button type="submit" class="w-full bg-verde-corte hover:bg-green-800 text-white font-bold py-3 px-4 rounded transition-colors uppercase tracking-widest text-sm">
+                        Receber
+                    </button>
+                </div>
+            </form>
         </div>
     </main>
 
