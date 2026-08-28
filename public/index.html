@@ -3,127 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Corte Barber Shop</title>
+    <title>La Corte Barbearia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'chumbo': '#121212',
-                        'chumbo-claro': '#1E1E1E',
-                        'verde-corte': '#1F4529',
-                        'verde-destaque': '#4FA184',
-                        'prata': '#B0B0B0'
+                        'fundo': '#0a0c0a', /* Preto mais profundo */
+                        'fundo-card': '#131814', /* Fundo para os cards */
+                        'verde-jacare': '#153e1f', /* Verde escuro da logo */
+                        'verde-neon': '#32c759', /* Verde vibrante da logo */
+                        'prata': '#b3b8b5' /* Prata metálico */
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-chumbo text-white font-sans antialiased">
+<body class="bg-fundo text-white font-sans antialiased">
 
-    <header class="fixed w-full top-0 bg-chumbo border-b border-gray-800 z-50">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-white to-prata">
-                LA CORTE
-            </h1>
+    <header class="fixed w-full top-0 bg-fundo/95 backdrop-blur border-b border-verde-jacare z-50">
+        <div class="max-w-6xl mx-auto px-6 py-2 flex justify-between items-center">
+            <!-- A SUA LOGO AQUI -->
+            <img src="/assets/img/logo.png" alt="La Corte Barbearia" class="h-16 md:h-20 object-contain">
+            
             <nav class="hidden md:flex gap-6">
-                <a href="#inicio" class="text-prata hover:text-verde-destaque transition-colors uppercase tracking-wider text-sm">Início</a>
-                <a href="#servicos" class="text-prata hover:text-verde-destaque transition-colors uppercase tracking-wider text-sm">Agendar</a>
-                <a href="#localizacao" class="text-prata hover:text-verde-destaque transition-colors uppercase tracking-wider text-sm">Localização</a>
+                <a href="#inicio" class="text-prata hover:text-verde-neon transition-colors uppercase tracking-wider text-sm font-bold">Início</a>
+                <a href="#servicos" class="text-prata hover:text-verde-neon transition-colors uppercase tracking-wider text-sm font-bold">Agendar</a>
+                <a href="#localizacao" class="text-prata hover:text-verde-neon transition-colors uppercase tracking-wider text-sm font-bold">Localização</a>
             </nav>
-            <a href="https://wa.me/5521969390314" target="_blank" class="bg-verde-corte hover:bg-green-800 text-white px-5 py-2 rounded font-bold uppercase tracking-wider text-xs transition-colors">
+            <a href="https://wa.me/5521969390314" target="_blank" class="bg-verde-jacare hover:bg-green-900 text-white px-5 py-2 rounded font-bold uppercase tracking-wider text-xs transition-colors border border-verde-neon/30">
                 WhatsApp
             </a>
         </div>
     </header>
 
-    <section id="inicio" class="pt-32 pb-20 px-6 min-h-[80vh] flex flex-col justify-center items-center text-center bg-gradient-to-b from-chumbo-claro to-chumbo">
+    <section id="inicio" class="pt-32 pb-20 px-6 min-h-[80vh] flex flex-col justify-center items-center text-center bg-gradient-to-b from-fundo-card to-fundo">
         <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-wider">
-            ESTILO E <span class="text-verde-destaque">PRECISÃO</span>
+            ESTILO E <span class="text-verde-neon">PRECISÃO</span>
         </h2>
         <p class="text-prata text-lg md:text-xl max-w-2xl mb-10">
             A verdadeira experiência de barbearia tradicional alinhada com as tendências modernas. Cuide do seu visual com quem entende do assunto.
         </p>
-        <a href="#servicos" class="bg-verde-destaque hover:bg-green-600 text-white px-8 py-4 rounded font-bold uppercase tracking-widest text-sm transition-colors shadow-[0_0_15px_rgba(79,161,132,0.3)]">
+        <a href="#servicos" class="bg-verde-neon hover:bg-green-500 text-fundo px-8 py-4 rounded font-black uppercase tracking-widest text-sm transition-colors shadow-[0_0_15px_rgba(50,199,89,0.3)] hover:shadow-[0_0_25px_rgba(50,199,89,0.6)]">
             Agendar meu horário
         </a>
     </section>
 
     <!-- FORMULÁRIO DE AGENDAMENTO -->
-    <section id="servicos" class="py-20 px-6 max-w-4xl mx-auto border-t border-gray-800">
+    <section id="servicos" class="py-20 px-6 max-w-4xl mx-auto border-t border-verde-jacare">
         <div class="text-center mb-16">
             <h3 class="text-3xl font-bold uppercase tracking-wider mb-2">Agende seu Horário</h3>
-            <div class="w-16 h-1 bg-verde-destaque mx-auto"></div>
+            <div class="w-16 h-1 bg-verde-neon mx-auto"></div>
             <p class="text-prata mt-4">Escolha o serviço e garanta seu lugar na fila.</p>
         </div>
         
-        <form id="form-agendamento-cliente" class="bg-chumbo-claro p-8 rounded-lg shadow-lg border border-gray-800 flex flex-col gap-6">
+        <form id="form-agendamento-cliente" class="bg-fundo-card p-8 rounded-lg shadow-xl border border-verde-jacare flex flex-col gap-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-verde-destaque text-xs uppercase mb-2 font-bold">Seu Nome</label>
-                    <input type="text" id="cliente-nome" required class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:border-verde-destaque focus:outline-none">
+                    <label class="block text-verde-neon text-xs uppercase mb-2 font-bold">Seu Nome</label>
+                    <input type="text" id="cliente-nome" required class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:border-verde-neon focus:outline-none transition-colors">
                 </div>
                 <div>
-                    <label class="block text-verde-destaque text-xs uppercase mb-2 font-bold">WhatsApp (com DDD)</label>
-                    <input type="tel" id="cliente-telefone" required class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:border-verde-destaque focus:outline-none" placeholder="21 90000-0000">
+                    <label class="block text-verde-neon text-xs uppercase mb-2 font-bold">WhatsApp (com DDD)</label>
+                    <input type="tel" id="cliente-telefone" required class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:border-verde-neon focus:outline-none transition-colors" placeholder="21 90000-0000">
                 </div>
             </div>
 
             <div>
-                <label class="block text-verde-destaque text-xs uppercase mb-2 font-bold">Qual o serviço de hoje?</label>
-                <select id="cliente-servico" required class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:border-verde-destaque focus:outline-none">
+                <label class="block text-verde-neon text-xs uppercase mb-2 font-bold">Qual o serviço de hoje?</label>
+                <select id="cliente-servico" required class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:border-verde-neon focus:outline-none transition-colors">
                     <option value="" disabled selected>Carregando serviços...</option>
                 </select>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-verde-destaque text-xs uppercase mb-2 font-bold">Data</label>
-                    <input type="date" id="cliente-data" required class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:border-verde-destaque focus:outline-none">
+                    <label class="block text-verde-neon text-xs uppercase mb-2 font-bold">Data</label>
+                    <input type="date" id="cliente-data" required class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:border-verde-neon focus:outline-none transition-colors">
                 </div>
                 <div>
-                    <label class="block text-verde-destaque text-xs uppercase mb-2 font-bold">Horário</label>
-                    <select id="cliente-hora" required class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:border-verde-destaque focus:outline-none disabled:opacity-50" disabled>
+                    <label class="block text-verde-neon text-xs uppercase mb-2 font-bold">Horário</label>
+                    <select id="cliente-hora" required class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:border-verde-neon focus:outline-none disabled:opacity-50 transition-colors" disabled>
                         <option value="" disabled selected>Selecione uma data primeiro</option>
                     </select>
                 </div>
             </div>
-            </div>
 
-            <button type="submit" class="w-full bg-verde-destaque hover:bg-green-600 text-white font-bold py-4 rounded uppercase tracking-widest transition-colors mt-4">
+            <button type="submit" class="w-full bg-verde-neon hover:bg-green-500 text-fundo font-black py-4 rounded uppercase tracking-widest transition-colors mt-4">
                 Confirmar Agendamento
             </button>
         </form>
     </section>
 
-    <!-- MAPA E CONTATO -->
-    <section id="localizacao" class="py-20 px-6 bg-chumbo-claro border-t border-gray-800">
+    <!-- MAPA -->
+    <section id="localizacao" class="py-20 px-6 bg-fundo-card border-t border-verde-jacare">
         <div class="max-w-6xl mx-auto">
             <div class="text-center mb-16">
                 <h3 class="text-3xl font-bold uppercase tracking-wider mb-2">Onde Estamos</h3>
-                <div class="w-16 h-1 bg-verde-destaque mx-auto"></div>
+                <div class="w-16 h-1 bg-verde-neon mx-auto"></div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-8">
                     <div>
-                        <h4 class="text-verde-destaque font-bold uppercase tracking-wider text-sm mb-2">Endereço</h4>
+                        <h4 class="text-verde-neon font-bold uppercase tracking-wider text-sm mb-2">Endereço</h4>
                         <p class="text-prata text-lg">R. Cmte. Coelho, 850 - Cordovil<br>Rio de Janeiro - RJ, 21250-510</p>
                     </div>
                     
                     <div>
-                        <h4 class="text-verde-destaque font-bold uppercase tracking-wider text-sm mb-2">Contato Direto</h4>
+                        <h4 class="text-verde-neon font-bold uppercase tracking-wider text-sm mb-2">Contato Direto</h4>
                         <p class="text-white font-bold text-2xl mb-2">21 96939-0314</p>
                     </div>
                     
                     <div>
-                        <h4 class="text-verde-destaque font-bold uppercase tracking-wider text-sm mb-2">Funcionamento</h4>
+                        <h4 class="text-verde-neon font-bold uppercase tracking-wider text-sm mb-2">Funcionamento</h4>
                         <p class="text-prata">Segunda a Sábado: 09:00 às 20:00<br>Domingo: Fechado</p>
                     </div>
                 </div>
 
-                <div class="w-full h-80 lg:h-96 rounded-lg overflow-hidden border-2 border-gray-700 shadow-lg">
+                <div class="w-full h-80 lg:h-96 rounded-lg overflow-hidden border-2 border-verde-jacare shadow-[0_0_20px_rgba(21,62,31,0.5)]">
                     <iframe 
                         src="https://maps.google.com/maps?q=R.+Cmte.+Coelho,+850+-+Cordovil,+Rio+de+Janeiro+-+RJ,+21250-510&t=&z=15&ie=UTF8&iwloc=&output=embed" 
                         width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
@@ -133,14 +133,13 @@
         </div>
     </section>
 
-    <footer class="bg-chumbo border-t border-verde-corte py-8 text-center text-prata text-sm">
-        <p>&copy; 2026 La Corte Barber Shop. Todos os direitos reservados.</p>
+    <footer class="bg-fundo border-t border-verde-jacare py-8 text-center text-prata text-sm">
+        <p>&copy; 2026 La Corte Barbearia. Todos os direitos reservados.</p>
     </footer>
 
-    <!-- LÓGICA DO CLIENTE (NÃO APAGAR) -->
+    <!-- LOGICA DO CLIENTE -->
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Puxa os serviços do banco
             try {
                 const res = await fetch('/api/servicos');
                 const servicos = await res.json();
@@ -154,11 +153,8 @@
                 }
             } catch(e) { console.error(e); }
 
-            // 2. Trava dias no passado e busca os horários livres
             const dataInput = document.getElementById('cliente-data');
             const horaSelect = document.getElementById('cliente-hora');
-            
-            // Impede selecionar ontem ou antes
             dataInput.min = new Date().toISOString().split('T')[0];
 
             dataInput.addEventListener('change', async (e) => {
@@ -177,14 +173,13 @@
                         horarios.forEach(h => {
                             horaSelect.innerHTML += `<option value="${h}">${h}</option>`;
                         });
-                        horaSelect.disabled = false; // Libera o campo
+                        horaSelect.disabled = false;
                     }
                 } catch (err) {
                     horaSelect.innerHTML = '<option value="" disabled selected>Erro ao carregar</option>';
                 }
             });
 
-            // 3. Envia o Agendamento
             const form = document.getElementById('form-agendamento-cliente');
             if(form) {
                 form.addEventListener('submit', async (e) => {
@@ -211,17 +206,15 @@
                         });
                         
                         if(!res.ok) {
-                            let erroMsg = "Erro na comunicação com a barbearia.";
+                            let erroMsg = "Erro na comunicação.";
                             try {
                                 const errData = await res.json();
                                 erroMsg = errData.detail || erroMsg;
-                            } catch(pe) {
-                                erroMsg = "Erro interno no servidor de banco de dados.";
-                            }
+                            } catch(pe) {}
                             throw new Error(erroMsg);
                         }
                         
-                        alert("Agendamento confirmado com sucesso! Te esperamos no horário marcado.");
+                        alert("Agendamento confirmado com sucesso!");
                         form.reset();
                         horaSelect.disabled = true;
                         horaSelect.innerHTML = '<option value="" disabled selected>Selecione uma data primeiro</option>';

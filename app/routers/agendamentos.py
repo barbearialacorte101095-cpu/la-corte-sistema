@@ -19,9 +19,8 @@ async def listar_agendamentos(data: str = None):
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
                 if data:
-                    # Forma mais segura de comparar datas no PostgreSQL (::date)
                     await cur.execute(
-                        "SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos WHERE data_hora_inicio::date = %s::date ORDER BY data_hora_inicio",
+                        "SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos WHERE DATE(data_hora_inicio) = %s ORDER BY data_hora_inicio",
                         (data,)
                     )
                 else:
@@ -30,22 +29,23 @@ async def listar_agendamentos(data: str = None):
                 rows = await cur.fetchall()
                 agendamentos = []
                 for r in rows:
-                    # Garantindo que a data seja lida corretamente mesmo se o banco devolver como texto
                     val_data = r[2]
-                    if isinstance(val_data, str):
-                        val_data = datetime.fromisoformat(val_data.replace('Z', '+00:00'))
-                        
+                    # Tratamento blindado para datas
+                    if isinstance(val_data, datetime):
+                        data_str = val_data.isoformat()
+                    else:
+                        data_str = str(val_data) if val_data else None
+
                     agendamentos.append({
                         "id": str(r[0]),
                         "servico_id": str(r[1]) if r[1] else None,
-                        "data_hora_inicio": val_data.isoformat() if val_data else None,
+                        "data_hora_inicio": data_str,
                         "status": r[3],
                         "cliente_nome": r[4] if r[4] else "Cliente",
                         "cliente_telefone": r[5] if r[5] else ""
                     })
                 return agendamentos
     except Exception as e:
-        # Repassa o erro exato para não gerar um apagão silencioso
         raise HTTPException(status_code=500, detail=f"Erro ao listar: {str(e)}")
 
 @router.get("/disponibilidade")
@@ -55,7 +55,7 @@ async def verificar_disponibilidade(data: str):
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(
-                    "SELECT data_hora_inicio FROM agendamentos WHERE data_hora_inicio::date = %s::date AND status != 'cancelado'",
+                    "SELECT data_hora_inicio FROM agendamentos WHERE DATE(data_hora_inicio) = %s AND status != 'cancelado'",
                     (data,)
                 )
                 rows = await cur.fetchall()
@@ -64,11 +64,12 @@ async def verificar_disponibilidade(data: str):
                 for r in rows:
                     if r[0]:
                         val = r[0]
-                        if isinstance(val, str):
-                            val = datetime.fromisoformat(val.replace('Z', '+00:00'))
-                        horarios_ocupados.append(val.strftime("%H:%M"))
+                        # Extrai a hora independentemente de ser string ou datetime
+                        if isinstance(val, datetime):
+                            horarios_ocupados.append(val.strftime("%H:%M"))
+                        else:
+                            horarios_ocupados.append(str(val)[11:16])
                 
-                # Gera lista de 30 em 30 min
                 horarios_disponiveis = []
                 hora_atual = datetime.strptime("09:00", "%H:%M")
                 hora_fim = datetime.strptime("19:30", "%H:%M")
@@ -94,7 +95,7 @@ async def criar_agendamento(dados: AgendamentoCliente):
                     (dados.data_hora_inicio,)
                 )
                 if await cur.fetchone():
-                    raise HTTPException(status_code=400, detail="Este horário acabou de ser reservado.")
+                    raise HTTPException(status_code=400, detail="Este horário já está reservado.")
 
                 await cur.execute(
                     """

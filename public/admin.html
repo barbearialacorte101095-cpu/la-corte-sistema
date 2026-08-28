@@ -3,36 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Corte Barber Shop - PDV</title>
+    <title>La Corte - Painel Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'chumbo': '#121212',
-                        'chumbo-claro': '#1E1E1E',
-                        'verde-corte': '#1F4529',
-                        'verde-destaque': '#4FA184',
-                        'prata': '#B0B0B0'
+                        'fundo': '#0a0c0a',
+                        'fundo-card': '#131814',
+                        'verde-jacare': '#153e1f',
+                        'verde-neon': '#32c759',
+                        'prata': '#b3b8b5'
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-chumbo text-white min-h-screen p-8 font-sans">
+<body class="bg-fundo text-white min-h-screen p-8 font-sans">
 
-    <!-- Cabeçalho Principal -->
-    <header class="flex justify-between items-center border-b border-verde-corte pb-6 mb-6">
-        <div>
-            <h1 class="text-3xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-prata">
-                LA CORTE
-            </h1>
-            <p class="text-verde-destaque font-semibold tracking-widest text-sm mt-1">SISTEMA GERENCIAL</p>
+    <!-- Cabeçalho Principal com a Logo -->
+    <header class="flex justify-between items-center border-b border-verde-jacare pb-6 mb-6">
+        <div class="flex items-center gap-4">
+            <img src="/assets/img/logo.png" alt="La Corte" class="h-14 md:h-16 object-contain">
+            <div>
+                <h1 class="text-2xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-prata hidden md:block">
+                    LA CORTE
+                </h1>
+                <p class="text-verde-neon font-bold tracking-widest text-xs md:text-sm uppercase mt-1">Sistema Gerencial</p>
+            </div>
         </div>
         <div>
-            <button onclick="fazerLogout()" class="text-prata hover:text-white text-sm uppercase tracking-wider transition-colors">
+            <button onclick="fazerLogout()" class="text-prata hover:text-white text-xs md:text-sm uppercase tracking-wider transition-colors">
                 Sair / Fechar Caixa
             </button>
         </div>
@@ -40,7 +43,7 @@
 
     <!-- Menu de Abas -->
     <nav class="flex gap-4 mb-8 border-b border-gray-800 pb-2">
-        <button onclick="mudarAba('aba-pdv')" id="btn-pdv" class="text-verde-destaque font-bold uppercase tracking-wider border-b-2 border-verde-destaque pb-2 px-2 transition-colors">Frente de Caixa</button>
+        <button onclick="mudarAba('aba-pdv')" id="btn-pdv" class="text-verde-neon font-bold uppercase tracking-wider border-b-2 border-verde-neon pb-2 px-2 transition-colors">Frente de Caixa</button>
         <button onclick="mudarAba('aba-servicos')" id="btn-servicos" class="text-prata hover:text-white font-bold uppercase tracking-wider border-b-2 border-transparent pb-2 px-2 transition-colors">Meus Serviços</button>
     </nav>
 
@@ -49,14 +52,14 @@
         
         <!-- DASHBOARD (4 CARDS) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-destaque shadow-lg">
+            <div class="bg-fundo-card p-6 rounded-lg border-l-4 border-verde-neon shadow-lg">
                 <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Faturamento (Hoje)</h2>
                 <div class="flex items-center justify-between">
                     <span id="valor-faturamento" class="text-2xl font-bold text-gray-500">...</span>
                 </div>
             </div>
             
-            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-destaque shadow-lg">
+            <div class="bg-fundo-card p-6 rounded-lg border-l-4 border-verde-neon shadow-lg">
                 <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Cortes (Hoje)</h2>
                 <div class="flex items-center justify-between">
                     <span id="qtd-cortes" class="text-2xl font-bold text-gray-500">...</span>
@@ -64,59 +67,59 @@
                 </div>
             </div>
 
-            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-destaque shadow-lg">
+            <div class="bg-fundo-card p-6 rounded-lg border-l-4 border-verde-neon shadow-lg">
                 <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Ticket Médio (Hoje)</h2>
                 <div class="flex items-center justify-between">
                     <span id="valor-ticket" class="text-2xl font-bold text-gray-500">...</span>
                 </div>
             </div>
 
-            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-gray-600 shadow-lg">
+            <div class="bg-fundo-card p-6 rounded-lg border-l-4 border-gray-600 shadow-lg">
                 <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Fundo de Caixa</h2>
                 <div class="flex items-center justify-between">
                     <span id="valor-caixa-abertura" class="text-2xl font-bold text-gray-500">R$ 0,00</span>
-                    <button onclick="abrirCaixa()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs uppercase tracking-wider transition-colors">Abrir</button>
+                    <button onclick="abrirCaixa()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs uppercase tracking-wider transition-colors border border-gray-500">Abrir</button>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- COLUNA ESQUERDA: NOVA VENDA -->
-            <div class="lg:col-span-1 bg-chumbo-claro p-6 rounded-lg border-t-4 border-verde-corte shadow-lg self-start">
+            <div class="lg:col-span-1 bg-fundo-card p-6 rounded-lg border-t-4 border-verde-jacare shadow-lg self-start">
                 <h2 class="text-prata font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
-                    <span class="text-verde-destaque text-xl leading-none">+</span> Nova Venda
+                    <span class="text-verde-neon text-xl leading-none">+</span> Nova Venda
                 </h2>
                 <form id="form-pdv" class="flex flex-col gap-4">
                     <div>
                         <label class="block text-prata text-xs uppercase mb-2">Serviço</label>
-                        <select id="pdv-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required>
+                        <select id="pdv-servico" class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-neon transition-colors" required>
                             <option value="" disabled selected>Selecione...</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-prata text-xs uppercase mb-2">Pagamento</label>
-                        <select id="pdv-pagamento" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required>
+                        <select id="pdv-pagamento" class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-neon transition-colors" required>
                             <option value="pix">Pix</option>
                             <option value="dinheiro">Dinheiro</option>
                             <option value="cartao_credito">Cartão de Crédito</option>
                             <option value="cartao_debito">Cartão de Débito</option>
                         </select>
                     </div>
-                    <button type="submit" class="w-full bg-verde-corte hover:bg-green-800 text-white font-bold py-3 px-4 rounded mt-2 transition-colors uppercase tracking-widest text-sm">
+                    <button type="submit" class="w-full bg-verde-jacare hover:bg-green-900 text-white font-bold py-3 px-4 rounded mt-2 transition-colors uppercase tracking-widest text-sm border border-verde-neon/30">
                         Receber
                     </button>
                 </form>
             </div>
 
             <!-- COLUNA DIREITA: FILA DE AGENDAMENTOS -->
-            <div class="lg:col-span-2 bg-chumbo-claro rounded-lg overflow-hidden shadow-lg border border-gray-800">
-                <div class="p-4 border-b border-gray-800 bg-chumbo flex justify-between items-center">
+            <div class="lg:col-span-2 bg-fundo-card rounded-lg overflow-hidden shadow-lg border border-gray-800">
+                <div class="p-4 border-b border-gray-800 bg-fundo flex justify-between items-center">
                     <h2 class="text-prata font-bold uppercase tracking-wider">Fila de Hoje</h2>
-                    <span class="text-xs bg-verde-corte text-white px-2 py-1 rounded">Tempo Real</span>
+                    <span class="text-xs bg-verde-jacare text-white px-2 py-1 rounded border border-verde-neon/30">Tempo Real</span>
                 </div>
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="text-prata text-xs uppercase tracking-wider border-b border-gray-800">
+                        <tr class="text-prata text-xs uppercase tracking-wider border-b border-gray-800 bg-fundo/50">
                             <th class="p-4">Horário</th>
                             <th class="p-4">Cliente / Contato</th>
                             <th class="p-4 text-center">Status</th>
@@ -132,29 +135,29 @@
 
     <!-- ABA 2: GERENCIAR SERVIÇOS -->
     <main id="aba-servicos" class="max-w-5xl mx-auto hidden">
-        <div class="bg-chumbo-claro p-6 rounded-lg border-t-4 border-verde-corte shadow-lg mb-8">
+        <div class="bg-fundo-card p-6 rounded-lg border-t-4 border-verde-jacare shadow-lg mb-8">
             <h2 class="text-prata font-bold uppercase tracking-wider mb-6">Cadastrar Novo Serviço</h2>
             <form id="form-novo-servico" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div>
                     <label class="block text-prata text-xs uppercase mb-2">Nome do Serviço</label>
-                    <input type="text" id="nome-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required placeholder="Ex: Corte Clássico">
+                    <input type="text" id="nome-servico" class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-neon transition-colors" required placeholder="Ex: Corte Clássico">
                 </div>
                 <div>
                     <label class="block text-prata text-xs uppercase mb-2">Preço (R$)</label>
-                    <input type="number" step="0.01" id="preco-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required placeholder="50.00">
+                    <input type="number" step="0.01" id="preco-servico" class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-neon transition-colors" required placeholder="50.00">
                 </div>
                 <div>
-                    <button type="submit" class="w-full bg-verde-corte hover:bg-green-800 text-white font-bold py-3 px-4 rounded uppercase tracking-widest text-sm">
+                    <button type="submit" class="w-full bg-verde-jacare hover:bg-green-900 text-white font-bold py-3 px-4 rounded uppercase tracking-widest text-sm transition-colors border border-verde-neon/30">
                         Salvar Serviço
                     </button>
                 </div>
             </form>
         </div>
 
-        <div class="bg-chumbo-claro rounded-lg overflow-hidden shadow-lg border border-gray-800">
+        <div class="bg-fundo-card rounded-lg overflow-hidden shadow-lg border border-gray-800">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-chumbo text-prata text-xs uppercase tracking-wider border-b border-gray-800">
+                    <tr class="bg-fundo text-prata text-xs uppercase tracking-wider border-b border-gray-800">
                         <th class="p-4">Serviço</th>
                         <th class="p-4">Preço</th>
                         <th class="p-4 text-center">Ações</th>
@@ -167,21 +170,22 @@
         </div>
     </main>
 
+    <!-- Scripts de Interação da Interface -->
     <script>
         function mudarAba(abaId) {
             document.getElementById('aba-pdv').classList.add('hidden');
             document.getElementById('aba-servicos').classList.add('hidden');
             
-            document.getElementById('btn-pdv').classList.replace('text-verde-destaque', 'text-prata');
-            document.getElementById('btn-pdv').classList.replace('border-verde-destaque', 'border-transparent');
+            document.getElementById('btn-pdv').classList.replace('text-verde-neon', 'text-prata');
+            document.getElementById('btn-pdv').classList.replace('border-verde-neon', 'border-transparent');
             
-            document.getElementById('btn-servicos').classList.replace('text-verde-destaque', 'text-prata');
-            document.getElementById('btn-servicos').classList.replace('border-verde-destaque', 'border-transparent');
+            document.getElementById('btn-servicos').classList.replace('text-verde-neon', 'text-prata');
+            document.getElementById('btn-servicos').classList.replace('border-verde-neon', 'border-transparent');
 
             document.getElementById(abaId).classList.remove('hidden');
             const btnAtivo = abaId === 'aba-pdv' ? 'btn-pdv' : 'btn-servicos';
-            document.getElementById(btnAtivo).classList.replace('text-prata', 'text-verde-destaque');
-            document.getElementById(btnAtivo).classList.replace('border-transparent', 'border-verde-destaque');
+            document.getElementById(btnAtivo).classList.replace('text-prata', 'text-verde-neon');
+            document.getElementById(btnAtivo).classList.replace('border-transparent', 'border-verde-neon');
         }
     </script>
     <script src="/assets/js/api.js"></script>
