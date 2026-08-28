@@ -13,6 +13,7 @@
                         'chumbo': '#121212',
                         'chumbo-claro': '#1E1E1E',
                         'verde-corte': '#1F4529',
+                        'verde-destaque': '#4FA184', /* Nova cor vibrante para textos */
                         'prata': '#B0B0B0'
                     }
                 }
@@ -28,7 +29,7 @@
             <h1 class="text-3xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-prata">
                 LA CORTE
             </h1>
-            <p class="text-verde-corte font-semibold tracking-widest text-sm mt-1">SISTEMA GERENCIAL</p>
+            <p class="text-verde-destaque font-semibold tracking-widest text-sm mt-1">SISTEMA GERENCIAL</p>
         </div>
         <div>
             <button onclick="fazerLogout()" class="text-prata hover:text-white text-sm uppercase tracking-wider transition-colors">
@@ -39,43 +40,59 @@
 
     <!-- Menu de Abas -->
     <nav class="flex gap-4 mb-8 border-b border-gray-800 pb-2">
-        <button onclick="mudarAba('aba-pdv')" id="btn-pdv" class="text-verde-corte font-bold uppercase tracking-wider border-b-2 border-verde-corte pb-2 px-2 transition-colors">Frente de Caixa</button>
+        <button onclick="mudarAba('aba-pdv')" id="btn-pdv" class="text-verde-destaque font-bold uppercase tracking-wider border-b-2 border-verde-destaque pb-2 px-2 transition-colors">Frente de Caixa</button>
         <button onclick="mudarAba('aba-servicos')" id="btn-servicos" class="text-prata hover:text-white font-bold uppercase tracking-wider border-b-2 border-transparent pb-2 px-2 transition-colors">Meus Serviços</button>
     </nav>
 
     <!-- ABA 1: FRENTE DE CAIXA -->
-    <main id="aba-pdv" class="max-w-5xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-corte shadow-lg">
-                <h2 class="text-prata text-sm uppercase tracking-wider mb-2">Faturamento (Hoje)</h2>
+    <main id="aba-pdv" class="max-w-6xl mx-auto">
+        
+        <!-- NOVO DASHBOARD -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-destaque shadow-lg">
+                <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Faturamento (Hoje)</h2>
                 <div class="flex items-center justify-between">
-                    <span id="valor-faturamento" class="text-3xl font-bold text-gray-500">Carregando...</span>
+                    <span id="valor-faturamento" class="text-2xl font-bold text-gray-500">...</span>
                 </div>
             </div>
-            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-corte shadow-lg">
-                <h2 class="text-prata text-sm uppercase tracking-wider mb-2">Cortes Realizados (Hoje)</h2>
+            
+            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-destaque shadow-lg">
+                <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Cortes (Hoje)</h2>
                 <div class="flex items-center justify-between">
-                    <span id="qtd-cortes" class="text-3xl font-bold text-gray-500">...</span>
-                    <span id="qtd-agendados" class="text-prata font-bold">...</span>
+                    <span id="qtd-cortes" class="text-2xl font-bold text-gray-500">...</span>
+                    <span id="qtd-agendados" class="text-prata text-sm font-bold">...</span>
+                </div>
+            </div>
+
+            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-destaque shadow-lg">
+                <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Ticket Médio (Hoje)</h2>
+                <div class="flex items-center justify-between">
+                    <span id="valor-ticket" class="text-2xl font-bold text-gray-500">...</span>
+                </div>
+            </div>
+
+            <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-gray-600 shadow-lg">
+                <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Faturamento (Mês)</h2>
+                <div class="flex items-center justify-between">
+                    <span id="valor-faturamento-mes" class="text-2xl font-bold text-gray-500">...</span>
                 </div>
             </div>
         </div>
 
         <div class="bg-chumbo-claro p-6 rounded-lg border-t-4 border-verde-corte shadow-lg">
             <h2 class="text-prata font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
-                <span>+</span> Registrar Nova Venda
+                <span class="text-verde-destaque text-xl leading-none">+</span> Registrar Nova Venda
             </h2>
             <form id="form-pdv" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div class="md:col-span-2">
                     <label class="block text-prata text-xs uppercase mb-2">Serviço Realizado</label>
-                    <select id="pdv-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-corte" required>
+                    <select id="pdv-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required>
                         <option value="" disabled selected>Selecione um serviço...</option>
-                        <!-- Os serviços serão carregados do banco de dados aqui -->
                     </select>
                 </div>
                 <div>
                     <label class="block text-prata text-xs uppercase mb-2">Pagamento</label>
-                    <select id="pdv-pagamento" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-corte" required>
+                    <select id="pdv-pagamento" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required>
                         <option value="pix">Pix</option>
                         <option value="cartao_credito">Cartão de Crédito</option>
                         <option value="cartao_debito">Cartão de Débito</option>
@@ -98,11 +115,11 @@
             <form id="form-novo-servico" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div>
                     <label class="block text-prata text-xs uppercase mb-2">Nome do Serviço</label>
-                    <input type="text" id="nome-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white" required placeholder="Ex: Corte Clássico">
+                    <input type="text" id="nome-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required placeholder="Ex: Corte Clássico">
                 </div>
                 <div>
                     <label class="block text-prata text-xs uppercase mb-2">Preço (R$)</label>
-                    <input type="number" step="0.01" id="preco-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white" required placeholder="50.00">
+                    <input type="number" step="0.01" id="preco-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required placeholder="50.00">
                 </div>
                 <div>
                     <button type="submit" class="w-full bg-verde-corte hover:bg-green-800 text-white font-bold py-3 px-4 rounded uppercase tracking-widest text-sm">
@@ -112,7 +129,6 @@
             </form>
         </div>
 
-        <!-- Tabela de Serviços Cadastrados -->
         <div class="bg-chumbo-claro rounded-lg overflow-hidden shadow-lg border border-gray-800">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -131,22 +147,20 @@
 
     <!-- Scripts -->
     <script>
-        // Função simples para alternar as abas
         function mudarAba(abaId) {
             document.getElementById('aba-pdv').classList.add('hidden');
             document.getElementById('aba-servicos').classList.add('hidden');
             
-            document.getElementById('btn-pdv').classList.replace('text-verde-corte', 'text-prata');
-            document.getElementById('btn-pdv').classList.replace('border-verde-corte', 'border-transparent');
+            document.getElementById('btn-pdv').classList.replace('text-verde-destaque', 'text-prata');
+            document.getElementById('btn-pdv').classList.replace('border-verde-destaque', 'border-transparent');
             
-            document.getElementById('btn-servicos').classList.replace('text-verde-corte', 'text-prata');
-            document.getElementById('btn-servicos').classList.replace('border-verde-corte', 'border-transparent');
+            document.getElementById('btn-servicos').classList.replace('text-verde-destaque', 'text-prata');
+            document.getElementById('btn-servicos').classList.replace('border-verde-destaque', 'border-transparent');
 
-            // Ativa a selecionada
             document.getElementById(abaId).classList.remove('hidden');
             const btnAtivo = abaId === 'aba-pdv' ? 'btn-pdv' : 'btn-servicos';
-            document.getElementById(btnAtivo).classList.replace('text-prata', 'text-verde-corte');
-            document.getElementById(btnAtivo).classList.replace('border-transparent', 'border-verde-corte');
+            document.getElementById(btnAtivo).classList.replace('text-prata', 'text-verde-destaque');
+            document.getElementById(btnAtivo).classList.replace('border-transparent', 'border-verde-destaque');
         }
     </script>
     <script src="/assets/js/api.js"></script>
