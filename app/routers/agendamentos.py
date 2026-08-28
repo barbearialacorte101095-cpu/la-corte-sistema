@@ -19,28 +19,30 @@ async def listar_agendamentos(data: str = None):
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
                 if data:
-                    # Método seguro: busca tudo que for >= Hoje e < Amanhã
+                    # Usa o CAST do SQL para ler qualquer formato e converte direto na fonte
                     await cur.execute(
                         """
-                        SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone 
+                        SELECT id, servico_id, CAST(data_hora_inicio AS TEXT), status, cliente_nome, cliente_telefone 
                         FROM agendamentos 
-                        WHERE data_hora_inicio >= %s::date 
-                        AND data_hora_inicio < %s::date + interval '1 day'
+                        WHERE CAST(data_hora_inicio AS TEXT) LIKE %s
                         ORDER BY data_hora_inicio
                         """,
-                        (data, data)
+                        (f"{data}%",)
                     )
                 else:
-                    await cur.execute("SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos ORDER BY data_hora_inicio")
+                    await cur.execute(
+                        """
+                        SELECT id, servico_id, CAST(data_hora_inicio AS TEXT), status, cliente_nome, cliente_telefone 
+                        FROM agendamentos 
+                        ORDER BY data_hora_inicio
+                        """
+                    )
                 
                 rows = await cur.fetchall()
                 agendamentos = []
                 for r in rows:
                     val = r[2]
-                    # Garante que o Javascript consiga ler a data, independente de como o banco devolver
-                    if isinstance(val, datetime):
-                        data_str = val.isoformat()
-                    elif val:
+                    if val:
                         data_str = str(val).replace(' ', 'T')
                     else:
                         data_str = None
@@ -63,31 +65,20 @@ async def verificar_disponibilidade(data: str):
         pool = await get_pool()
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
+                # O SUBSTRING do SQL extrai diretamente a hora. Ex: "2026-08-30 15:30:00" vira "15:30"
                 await cur.execute(
                     """
-                    SELECT data_hora_inicio 
+                    SELECT SUBSTRING(CAST(data_hora_inicio AS TEXT) FROM 12 FOR 5)
                     FROM agendamentos 
-                    WHERE data_hora_inicio >= %s::date 
-                    AND data_hora_inicio < %s::date + interval '1 day' 
+                    WHERE CAST(data_hora_inicio AS TEXT) LIKE %s 
                     AND status != 'cancelado'
                     """,
-                    (data, data)
+                    (f"{data}%",)
                 )
                 rows = await cur.fetchall()
                 
-                horarios_ocupados = []
-                for r in rows:
-                    val = r[0]
-                    if val:
-                        if isinstance(val, datetime):
-                            horarios_ocupados.append(val.strftime("%H:%M"))
-                        else:
-                            # Caso extremo: tenta fatiar com segurança se vier como texto
-                            val_str = str(val)
-                            if 'T' in val_str:
-                                horarios_ocupados.append(val_str.split('T')[1][:5])
-                            elif ' ' in val_str:
-                                horarios_ocupados.append(val_str.split(' ')[1][:5])
+                # Pega as horas blindadas e limpas (já filtrando valores nulos)
+                horarios_ocupados = [str(r[0]) for r in rows if r[0]]
                 
                 horarios_disponiveis = []
                 hora_atual = datetime.strptime("09:00", "%H:%M")
