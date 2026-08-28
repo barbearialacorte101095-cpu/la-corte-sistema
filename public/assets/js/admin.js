@@ -91,7 +91,7 @@ async function carregarServicos() {
                         <td class="p-4 text-sm font-medium text-white">${s.nome}</td>
                         <td class="p-4 text-sm text-verde-destaque font-bold">R$ ${Number(s.preco).toFixed(2).replace('.', ',')}</td>
                         <td class="p-4 text-center">
-                            <button onclick="excluirServico(${s.id})" class="text-red-500 hover:text-red-400 text-xs uppercase tracking-wider">Excluir</button>
+                            <button onclick="excluirServico('${s.id}')" class="text-red-500 hover:text-red-400 text-xs uppercase tracking-wider">Excluir</button>
                         </td>
                     </tr>
                 `).join('');

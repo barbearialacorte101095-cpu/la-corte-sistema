@@ -51,3 +51,16 @@ async def alternar_status_servico(servico_id: UUID, ativo: bool):
             if not row:
                 raise HTTPException(404, "Serviço não encontrado")
             return row
+@router.delete("/{servico_id}")
+async def excluir_servico(servico_id: str):
+    try:
+        async with pool.connection() as conn:
+            async with conn.cursor() as cur:
+                # Deleta o serviço onde o ID for igual ao enviado
+                await cur.execute(
+                    "DELETE FROM servicos WHERE id = %s",
+                    (servico_id,)
+                )
+        return {"mensagem": "Serviço excluído com sucesso"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
