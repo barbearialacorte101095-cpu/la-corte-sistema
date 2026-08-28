@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Restrito - La Corte</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'chumbo': '#121212',
+                        'chumbo-claro': '#1E1E1E',
+                        'verde-corte': '#1F4529',
+                        'prata': '#B0B0B0'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-chumbo text-white h-screen flex items-center justify-center font-sans">
+
+    <div class="bg-chumbo-claro p-8 rounded-lg border-t-4 border-verde-corte shadow-2xl w-full max-w-md">
+        
+        <!-- Cabeçalho do Login -->
+        <div class="text-center mb-8">
+            <img src="/assets/img/logo.jpeg" alt="Logo La Corte" class="h-20 w-auto mx-auto mb-4 object-contain">
+            <h1 class="text-2xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-prata">
+                ACESSO RESTRITO
+            </h1>
+            <p class="text-prata text-sm mt-1">Insira suas credenciais para continuar</p>
+        </div>
+
+        <!-- Formulário de Autenticação -->
+        <form id="form-login" class="space-y-6">
+            <div>
+                <label class="block text-prata text-xs uppercase tracking-wider mb-2">Usuário</label>
+                <input type="text" id="username" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-corte transition-colors" required placeholder="admin">
+            </div>
+            
+            <div>
+                <label class="block text-prata text-xs uppercase tracking-wider mb-2">Senha</label>
+                <input type="password" id="password" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-corte transition-colors" required placeholder="••••••••">
+            </div>
+
+            <div id="msg-erro" class="text-red-500 text-sm hidden text-center">
+                Usuário ou senha incorretos.
+            </div>
+
+            <button type="submit" class="w-full bg-verde-corte hover:bg-green-800 text-white font-bold py-3 px-4 rounded transition-colors uppercase tracking-widest text-sm">
+                Entrar no Sistema
+            </button>
+        </form>
+
+    </div>
+
+    <script src="/assets/js/login.js"></script>
+</body>
+</html>

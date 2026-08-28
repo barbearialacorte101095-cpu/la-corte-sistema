@@ -1,5 +1,15 @@
 // Painel administrativo: resumo financeiro do dia, agenda e lançamentos.
+// TRAVA DE SEGURANÇA: Verifica se o administrador está logado
+if (!localStorage.getItem('token_lacorte')) {
+    // Se não tiver o token, expulsa para a tela de login
+    window.location.href = '/login.html';
+}
 
+// Para adicionar o botão de "Sair" depois, basta usar a função abaixo:
+function fazerLogout() {
+    localStorage.removeItem('token_lacorte');
+    window.location.href = '/login.html';
+}
 function formatarPreco(valor) {
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
