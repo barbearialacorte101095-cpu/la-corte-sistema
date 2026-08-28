@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.core.database import get_pool
+from datetime import datetime
 
 router = APIRouter()
 
@@ -18,14 +19,13 @@ async def criar_transacao(dados: TransacaoCreate):
             async with conn.cursor() as cur:
                 try:
                     await cur.execute(
-                        "INSERT INTO transacoes_financeiras (tipo, categoria, valor, descricao) VALUES (%s, %s, %s, %s)",
+                        "INSERT INTO transacoes (tipo, categoria, valor, descricao) VALUES (%s, %s, %s, %s)",
                         (dados.tipo, dados.categoria, dados.valor, dados.descricao)
                     )
                 except Exception:
-                    # Fallback de segurança se a tabela tiver outro nome
                     await conn.rollback()
                     await cur.execute(
-                        "INSERT INTO transacoes (tipo, categoria, valor, descricao) VALUES (%s, %s, %s, %s)",
+                        "INSERT INTO transacoes_financeiras (tipo, categoria, valor, descricao) VALUES (%s, %s, %s, %s)",
                         (dados.tipo, dados.categoria, dados.valor, dados.descricao)
                     )
             await conn.commit()
@@ -40,34 +40,44 @@ async def resumo_financeiro(data_inicio: str, data_fim: str):
         rows = []
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
-                try:
-                    await cur.execute("SELECT tipo, valor, criado_em FROM transacoes_financeiras")
-                    rows = await cur.fetchall()
-                except Exception:
-                    await conn.rollback()
+                # O Python vai testar todos os nomes possíveis de colunas até achar a certa
+                queries = [
+                    "SELECT tipo, valor, created_at FROM transacoes",
+                    "SELECT tipo, valor, criado_em FROM transacoes",
+                    "SELECT tipo, valor, data_transacao FROM transacoes",
+                    "SELECT tipo, valor, created_at FROM transacoes_financeiras",
+                    "SELECT tipo, valor, criado_em FROM transacoes_financeiras"
+                ]
+                for q in queries:
                     try:
-                        await cur.execute("SELECT tipo, valor, criado_em FROM transacoes")
+                        await cur.execute(q)
                         rows = await cur.fetchall()
+                        break
                     except Exception:
-                        pass # Retorna vazio sem causar erro 500
+                        await conn.rollback()
 
         entradas = 0.0
         saidas = 0.0
 
         for r in rows:
-            tipo = str(r[0])
-            valor = float(r[1] or 0)
-            dt_str = str(r[2]) if r[2] else ""
+            tipo = str(r[0]).lower()
+            try:
+                valor = float(r[1])
+            except:
+                valor = 0.0
             
-            if len(dt_str) >= 10:
-                data_do_banco = dt_str[:10]
-                
-                # Filtragem cirúrgica no Python
-                if data_inicio <= data_do_banco <= data_fim:
-                    if tipo == 'entrada':
-                        entradas += valor
-                    else:
-                        saidas += valor
+            val_dt = r[2]
+            # O Python decide como formatar independente de como o banco devolver
+            if isinstance(val_dt, datetime):
+                data_str = val_dt.strftime("%Y-%m-%d")
+            else:
+                data_str = str(val_dt)[:10]
+
+            if data_inicio <= data_str <= data_fim:
+                if tipo == 'entrada':
+                    entradas += valor
+                else:
+                    saidas += valor
 
         return {
             "entradas": entradas,

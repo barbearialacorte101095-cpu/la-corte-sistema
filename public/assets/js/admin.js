@@ -85,44 +85,53 @@ async function carregarAgendaDoDia() {
 }
 
 async function carregarDashboard() {
+    const hoje = hojeISO();
+    const dataAtual = new Date();
+    const primeiroDiaMes = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 1).toISOString().split('T')[0];
+    const ultimoDiaMes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 0).toISOString().split('T')[0];
+
+    let faturamentoHoje = 0;
+    let concluidos = 0;
+    let agendados = 0;
+
+    // 1. Tenta carregar faturamento (independente)
     try {
-        const hoje = hojeISO();
-        
-        const [resumoHoje, agendamentosHoje] = await Promise.all([
-            api.get(`/financeiro/resumo?data_inicio=${hoje}&data_fim=${hoje}`),
-            api.get(`/agendamentos?data=${hoje}`)
-        ]);
+        const resumoHoje = await api.get(`/financeiro/resumo?data_inicio=${hoje}&data_fim=${hoje}`);
+        faturamentoHoje = resumoHoje.entradas || 0;
+    } catch (e) { console.error("Aviso: Faturamento falhou", e); }
 
-        const faturamentoHoje = resumoHoje.entradas || 0;
-        
-        const concluidos = agendamentosHoje ? agendamentosHoje.filter(a => a.status === 'concluido').length : 0;
-        const agendados = agendamentosHoje ? agendamentosHoje.length : 0;
-        const ticketMedio = concluidos > 0 ? faturamentoHoje / concluidos : 0;
-
-        const els = {
-            fatHoje: document.getElementById("valor-faturamento"),
-            cortes: document.getElementById("qtd-cortes"),
-            agendados: document.getElementById("qtd-agendados"),
-            ticket: document.getElementById("valor-ticket")
-        };
-
-        if(els.fatHoje) {
-            els.fatHoje.textContent = formatarPreco(faturamentoHoje);
-            els.fatHoje.classList.replace("text-gray-500", "text-white");
-            
-            els.cortes.textContent = concluidos;
-            els.cortes.classList.replace("text-gray-500", "text-white");
-            els.agendados.textContent = `Agendados: ${agendados}`;
-            
-            els.ticket.textContent = formatarPreco(ticketMedio);
-            els.ticket.classList.replace("text-gray-500", "text-white");
+    // 2. Tenta carregar agendamentos (independente)
+    try {
+        const agendamentosHoje = await api.get(`/agendamentos?data=${hoje}`);
+        if (Array.isArray(agendamentosHoje)) {
+            concluidos = agendamentosHoje.filter(a => a.status === 'concluido').length;
+            agendados = agendamentosHoje.length;
         }
+    } catch (e) { console.error("Aviso: Agendamentos falharam", e); }
 
-        await carregarAgendaDoDia();
+    const ticketMedio = concluidos > 0 ? faturamentoHoje / concluidos : 0;
 
-    } catch (e) {
-        console.error("Erro ao carregar o dashboard:", e);
+    // 3. Atualiza a tela sem depender de Promise.all
+    const els = {
+        fatHoje: document.getElementById("valor-faturamento"),
+        cortes: document.getElementById("qtd-cortes"),
+        agendados: document.getElementById("qtd-agendados"),
+        ticket: document.getElementById("valor-ticket")
+    };
+
+    if(els.fatHoje) {
+        els.fatHoje.textContent = formatarPreco(faturamentoHoje);
+        els.fatHoje.classList.replace("text-gray-500", "text-white");
+        
+        els.cortes.textContent = concluidos;
+        els.cortes.classList.replace("text-gray-500", "text-white");
+        els.agendados.textContent = `Agendados: ${agendados}`;
+        
+        els.ticket.textContent = formatarPreco(ticketMedio);
+        els.ticket.classList.replace("text-gray-500", "text-white");
     }
+
+    await carregarAgendaDoDia();
 }
 
 // ==========================================
