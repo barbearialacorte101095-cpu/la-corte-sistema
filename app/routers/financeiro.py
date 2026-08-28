@@ -41,12 +41,14 @@ async def resumo_financeiro(data_inicio: str, data_fim: str):
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
                 # O Python vai testar todos os nomes possíveis de colunas até achar a certa
+                # Os aliases (AS tipo/valor/dt) garantem chaves previsíveis no dict
+                # retornado por cada linha, independente do nome real da coluna de data.
                 queries = [
-                    "SELECT tipo, valor, created_at FROM transacoes",
-                    "SELECT tipo, valor, criado_em FROM transacoes",
-                    "SELECT tipo, valor, data_transacao FROM transacoes",
-                    "SELECT tipo, valor, created_at FROM transacoes_financeiras",
-                    "SELECT tipo, valor, criado_em FROM transacoes_financeiras"
+                    "SELECT tipo AS tipo, valor AS valor, created_at AS dt FROM transacoes",
+                    "SELECT tipo AS tipo, valor AS valor, criado_em AS dt FROM transacoes",
+                    "SELECT tipo AS tipo, valor AS valor, data_transacao AS dt FROM transacoes",
+                    "SELECT tipo AS tipo, valor AS valor, created_at AS dt FROM transacoes_financeiras",
+                    "SELECT tipo AS tipo, valor AS valor, criado_em AS dt FROM transacoes_financeiras"
                 ]
                 for q in queries:
                     try:
@@ -60,13 +62,13 @@ async def resumo_financeiro(data_inicio: str, data_fim: str):
         saidas = 0.0
 
         for r in rows:
-            tipo = str(r[0]).lower()
+            tipo = str(r["tipo"]).lower()
             try:
-                valor = float(r[1])
+                valor = float(r["valor"])
             except:
                 valor = 0.0
             
-            val_dt = r[2]
+            val_dt = r["dt"]
             # O Python decide como formatar independente de como o banco devolver
             if isinstance(val_dt, datetime):
                 data_str = val_dt.strftime("%Y-%m-%d")

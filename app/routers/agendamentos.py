@@ -22,7 +22,7 @@ async def listar_agendamentos(data: str = None):
                 
         agendamentos = []
         for r in rows:
-            dt_val = r[2]
+            dt_val = r["data_hora_inicio"]
             if not dt_val:
                 continue
                 
@@ -40,12 +40,12 @@ async def listar_agendamentos(data: str = None):
                 continue
                 
             agendamentos.append({
-                "id": str(r[0]),
-                "servico_id": str(r[1]) if r[1] else None,
+                "id": str(r["id"]),
+                "servico_id": str(r["servico_id"]) if r["servico_id"] else None,
                 "data_hora_inicio": dt_obj.isoformat(),
-                "status": str(r[3]) if r[3] else "pendente",
-                "cliente_nome": str(r[4]) if r[4] else "Cliente",
-                "cliente_telefone": str(r[5]) if r[5] else ""
+                "status": str(r["status"]) if r["status"] else "pendente",
+                "cliente_nome": str(r["cliente_nome"]) if r["cliente_nome"] else "Cliente",
+                "cliente_telefone": str(r["cliente_telefone"]) if r["cliente_telefone"] else ""
             })
         
         agendamentos.sort(key=lambda x: x["data_hora_inicio"])
@@ -64,11 +64,11 @@ async def verificar_disponibilidade(data: str):
                 
         horarios_ocupados = []
         for r in rows:
-            status = str(r[1]).lower() if r[1] else ""
+            status = str(r["status"]).lower() if r["status"] else ""
             if status == 'cancelado':
                 continue
                 
-            dt_val = r[0]
+            dt_val = r["data_hora_inicio"]
             if not dt_val:
                 continue
                 
@@ -110,9 +110,9 @@ async def criar_agendamento(dados: AgendamentoCliente):
                 await cur.execute("SELECT data_hora_inicio, status FROM agendamentos")
                 rows = await cur.fetchall()
                 for r in rows:
-                    if str(r[1]).lower() == 'cancelado':
+                    if str(r["status"]).lower() == 'cancelado':
                         continue
-                    val = r[0]
+                    val = r["data_hora_inicio"]
                     if isinstance(val, datetime):
                         if val.replace(tzinfo=None) == dt_inicio.replace(tzinfo=None):
                             raise HTTPException(status_code=400, detail="Este horário já está reservado.")
