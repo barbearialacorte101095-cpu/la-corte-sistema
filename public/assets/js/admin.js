@@ -134,13 +134,26 @@ if (formNovoServico) {
     });
 }
 
+// Excluir Serviço (Versão aprimorada com fetch nativo)
 window.excluirServico = async function(id) {
     if(confirm("Deseja excluir este serviço? O site dos clientes também será atualizado.")) {
         try {
-            await api.delete(`/servicos/${id}`);
-            await carregarServicos();
+            // Usando o fetch nativo do navegador para contornar o api.js
+            const resposta = await fetch(`/api/servicos/${id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!resposta.ok) {
+                throw new Error(`Erro ${resposta.status}: A rota de exclusão no Python falhou ou não existe.`);
+            }
+
+            alert("Serviço excluído com sucesso!");
+            await carregarServicos(); // Atualiza a tabela na hora
+            
         } catch(e) {
-            alert("Erro ao excluir o serviço.");
+            console.error("Erro completo:", e);
+            alert("Falha ao excluir: " + e.message);
         }
     }
 };
