@@ -1,219 +1,179 @@
-// Painel administrativo: resumo financeiro do dia, agenda e lançamentos.
-// TRAVA DE SEGURANÇA: Verifica se o administrador está logado
+// ==========================================
+// 1. SISTEMA DE SEGURANÇA
+// ==========================================
 if (!localStorage.getItem('token_lacorte')) {
-    // Se não tiver o token, expulsa para a tela de login
     window.location.href = '/login.html';
 }
 
-// Para adicionar o botão de "Sair" depois, basta usar a função abaixo:
-function fazerLogout() {
+window.fazerLogout = function() {
     localStorage.removeItem('token_lacorte');
     window.location.href = '/login.html';
 }
+
 function formatarPreco(valor) {
-  return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 function hojeISO() {
-  return new Date().toISOString().split("T")[0];
+    return new Date().toISOString().split("T")[0];
 }
 
-const statusLabel = {
-  pendente: "Pendente",
-  confirmado: "Confirmado",
-  concluido: "Concluído",
-  cancelado: "Cancelado",
-  nao_compareceu: "Não compareceu",
-};
-
-// 1. CARREGA O RESUMO FINANCEIRO E ATUALIZA OS CARDS
+// ==========================================
+// 2. CARREGAMENTO DOS DADOS (DASHBOARD)
+// ==========================================
 async function carregarResumo() {
-  const hoje = hojeISO();
-  try {
-    // Usa o helper 'api' criado pelo Claude
-    const resumo = await api.get(`/financeiro/resumo?data_inicio=${hoje}&data_fim=${hoje}`);
-    
-    // Atualiza Faturamento
-    const faturamentoEl = document.getElementById("valor-faturamento");
-    if (faturamentoEl) {
-        faturamentoEl.textContent = formatarPreco(resumo.entradas);
-        faturamentoEl.classList.remove("text-gray-500");
-        faturamentoEl.classList.add("text-white");
+    try {
+        const resumo = await api.get(`/financeiro/resumo?data_inicio=${hojeISO()}&data_fim=${hojeISO()}`);
+        const faturamentoEl = document.getElementById("valor-faturamento");
+        if (faturamentoEl) {
+            faturamentoEl.textContent = formatarPreco(resumo.entradas || 0);
+            faturamentoEl.classList.replace("text-gray-500", "text-white");
+        }
+    } catch (e) {
+        console.error("Erro no resumo:", e);
     }
-
-    // Atualiza Comissões
-    const comissoesEl = document.getElementById("valor-comissoes");
-    if (comissoesEl) {
-        comissoesEl.textContent = formatarPreco(resumo.comissoes_pendentes);
-        comissoesEl.classList.remove("text-gray-500");
-        comissoesEl.classList.add("text-white");
-    }
-
-  } catch (e) {
-    console.error("Erro ao carregar resumo financeiro:", e);
-    const faturamentoEl = document.getElementById("valor-faturamento");
-    if (faturamentoEl) faturamentoEl.textContent = "Erro de conexão";
-    
-    const comissoesEl = document.getElementById("valor-comissoes");
-    if (comissoesEl) comissoesEl.textContent = "Erro de conexão";
-  }
 }
 
-// 2. CARREGA A AGENDA DO DIA E CONTA OS CORTES REALIZADOS
 async function carregarAgendaDoDia() {
-  const lista = document.getElementById("lista-agenda");
-  
-  try {
-    const agendamentos = await api.get(`/agendamentos?data=${hojeISO()}`);
-
-    // Atualiza o card de "Cortes Realizados" no painel
-    const qtdCortesEl = document.getElementById('qtd-cortes');
-    const qtdAgendadosEl = document.getElementById('qtd-agendados');
-    
-    if (qtdCortesEl && qtdAgendadosEl) {
-        // Conta apenas os serviços marcados como "concluido"
-        const concluidos = agendamentos.filter(a => a.status === 'concluido').length;
-        qtdCortesEl.textContent = concluidos;
-        qtdCortesEl.classList.remove("text-gray-500");
-        qtdCortesEl.classList.add("text-white");
+    try {
+        const agendamentos = await api.get(`/agendamentos?data=${hojeISO()}`);
+        const qtdCortesEl = document.getElementById('qtd-cortes');
+        const qtdAgendadosEl = document.getElementById('qtd-agendados');
         
-        qtdAgendadosEl.textContent = `Agendados: ${agendamentos.length}`;
+        if (qtdCortesEl && qtdAgendadosEl) {
+            const concluidos = agendamentos.filter(a => a.status === 'concluido').length;
+            qtdCortesEl.textContent = concluidos;
+            qtdCortesEl.classList.replace("text-gray-500", "text-white");
+            qtdAgendadosEl.textContent = `Agendados: ${agendamentos.length}`;
+        }
+    } catch (e) {
+        console.error("Erro na agenda:", e);
     }
-
-    if (!lista) return; // Se a tabela de agenda não estiver na tela, para por aqui
-
-    if (agendamentos.length === 0) {
-      lista.innerHTML = `<p class="text-sm text-[var(--silver-dim)] py-6 text-center">Nenhum agendamento para hoje.</p>`;
-      return;
-    }
-
-    lista.innerHTML = agendamentos
-      .map((a) => {
-        const hora = new Date(a.data_hora_inicio).toLocaleTimeString("pt-BR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-        return `
-        <div class="flex items-center justify-between py-3 border-b border-[var(--panel-border)] last:border-0">
-          <div class="flex items-center gap-4">
-            <span class="mono text-[var(--moss-300)] text-sm w-14">${hora}</span>
-            <div>
-              <p class="text-white text-sm font-medium">${a.cliente_nome}</p>
-              <p class="text-xs text-[var(--silver-dim)]">${a.servico_nome} · ${a.barbeiro_nome}</p>
-            </div>
-          </div>
-          <span class="pill pill-${a.status}">${statusLabel[a.status] ?? a.status}</span>
-        </div>`;
-      })
-      .join("");
-  } catch (e) {
-    if (lista) lista.innerHTML = `<p class="text-sm text-[var(--danger-soft)] py-6 text-center">Erro ao carregar a agenda.</p>`;
-  }
 }
 
-// 3. CARREGA A TABELA DE TRANSAÇÕES FINANCEIRAS
-async function carregarTransacoes() {
-  const tbody = document.getElementById("corpo-tabela-transacoes");
-  if (!tbody) return; 
-  
-  try {
-    const transacoes = await api.get(`/financeiro/transacoes?data_inicio=${hojeISO()}&data_fim=${hojeISO()}`);
+async function carregarServicos() {
+    try {
+        const servicos = await api.get('/servicos');
+        const tbody = document.getElementById('lista-servicos-tabela');
+        const selectPdv = document.getElementById('pdv-servico');
+        
+        // Verifica se a tabela existe na tela
+        if (tbody) {
+            if (!servicos || servicos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-500">Nenhum serviço cadastrado.</td></tr>`;
+            } else {
+                tbody.innerHTML = servicos.map(s => `
+                    <tr class="border-b border-gray-800 hover:bg-chumbo-claro transition-colors">
+                        <td class="p-4 text-sm font-medium text-white">${s.nome}</td>
+                        <td class="p-4 text-sm text-verde-corte font-bold">R$ ${Number(s.preco).toFixed(2).replace('.', ',')}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="excluirServico(${s.id})" class="text-red-500 hover:text-red-400 text-xs uppercase tracking-wider">Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
 
-    if (transacoes.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4" class="text-center text-[var(--silver-dim)] py-6">Nenhum lançamento hoje.</td></tr>`;
-      return;
+        // Atualiza as opções do Frente de Caixa
+        if (selectPdv && servicos && servicos.length > 0) {
+            selectPdv.innerHTML = '<option value="" disabled selected>Selecione um serviço...</option>' + 
+                servicos.map(s => `
+                    <option value="${s.preco}">${s.nome} - R$ ${Number(s.preco).toFixed(2).replace('.', ',')}</option>
+                `).join('');
+        }
+    } catch (erro) {
+        console.error("Erro ao carregar serviços:", erro);
     }
-
-    tbody.innerHTML = transacoes
-      .map(
-        (t) => `
-        <tr class="border-b border-[var(--panel-border)] last:border-0">
-          <td class="py-3 text-sm">${t.descricao ?? t.categoria}</td>
-          <td class="py-3 text-sm text-[var(--silver-dim)] capitalize">${t.categoria.replace("_", " ")}</td>
-          <td class="py-3 text-sm mono ${t.tipo === "entrada" ? "text-[var(--moss-300)]" : "text-[var(--danger-soft)]"}">
-            ${t.tipo === "entrada" ? "+" : "−"} ${formatarPreco(t.valor)}
-          </td>
-          <td class="py-3 text-xs text-[var(--silver-dim)] mono">
-            ${new Date(t.data_transacao).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-          </td>
-        </tr>`
-      )
-      .join("");
-  } catch (e) {
-    if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="text-center text-[var(--danger-soft)] py-6">Erro ao carregar transações.</td></tr>`;
-  }
 }
 
-// 4. CADASTRA NOVA TRANSAÇÃO E ATUALIZA A TELA
-document.getElementById("form-nova-transacao")?.addEventListener("submit", async (ev) => {
-  ev.preventDefault();
-  const fd = new FormData(ev.target);
-  try {
-    await api.post("/financeiro/transacoes", {
-      tipo: fd.get("tipo"),
-      categoria: fd.get("categoria"),
-      valor: parseFloat(fd.get("valor")),
-      descricao: fd.get("descricao") || null,
-    });
-    ev.target.reset();
-    document.getElementById("modal-transacao")?.classList.add("hidden");
-    await Promise.all([carregarResumo(), carregarTransacoes()]);
-  } catch (e) {
-    alert(e.message);
-  }
-});
+// ==========================================
+// 3. AÇÕES DOS FORMULÁRIOS (SALVAR/RECEBER)
+// ==========================================
 
-// Inicializa tudo quando a página carregar
-document.addEventListener("DOMContentLoaded", () => {
-  carregarResumo();
-  carregarAgendaDoDia();
-  carregarTransacoes();
-});
-// ====== LÓGICA DO FRENTE DE CAIXA (PDV) ======
-
+// Frente de Caixa (PDV)
 const formPdv = document.getElementById('form-pdv');
 if (formPdv) {
     formPdv.addEventListener('submit', async (ev) => {
         ev.preventDefault();
-
-        // 1. Captura os valores selecionados no formulário
         const selectServico = document.getElementById('pdv-servico');
-        const selectPagamento = document.getElementById('pdv-pagamento');
-        
         const valorServico = parseFloat(selectServico.value);
-        // Pega o texto da opção selecionada (ex: "Corte Degradê (Fade) - R$ 60,00")
-        const nomeServicoText = selectServico.options[selectServico.selectedIndex].text;
-        // Limpa o texto para mandar apenas o nome do corte pro banco
-        const nomeServico = nomeServicoText.split(' - ')[0]; 
+        const nomeServico = selectServico.options[selectServico.selectedIndex].text.split(' - ')[0]; 
+        const metodoPagamento = document.getElementById('pdv-pagamento').value;
 
-        const metodoPagamento = selectPagamento.value;
+        const btnSubmit = ev.target.querySelector('button[type="submit"]');
+        const textoOriginal = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = 'Processando...';
 
         try {
-            // Muda o texto do botão para indicar carregamento
-            const btnSubmit = ev.target.querySelector('button[type="submit"]');
-            const textoOriginal = btnSubmit.innerHTML;
-            btnSubmit.innerHTML = 'Processando...';
-            btnSubmit.disabled = true;
-
-            // 2. Envia a transação de entrada para a API usando o helper do Claude
             await api.post("/financeiro/transacoes", {
                 tipo: "entrada",
                 categoria: metodoPagamento,
                 valor: valorServico,
                 descricao: nomeServico
             });
-
-            // 3. Limpa o formulário e recarrega o Faturamento do topo da página
             formPdv.reset();
             await carregarResumo(); 
-            
-            // Restaura o botão
-            btnSubmit.innerHTML = textoOriginal;
-            btnSubmit.disabled = false;
-
+            alert("Venda registrada com sucesso!");
         } catch (erro) {
-            console.error(erro);
-            alert("Erro ao registrar a venda. Tente novamente.");
+            alert("Erro ao registrar a venda: " + erro.message);
+        } finally {
+            btnSubmit.innerHTML = textoOriginal;
         }
     });
 }
+
+// Cadastro de Serviços
+const formNovoServico = document.getElementById('form-novo-servico');
+if (formNovoServico) {
+    formNovoServico.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const btnSubmit = ev.target.querySelector('button[type="submit"]');
+        const textoOriginal = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = 'Salvando...';
+
+        const nome = document.getElementById('nome-servico').value;
+        const preco = parseFloat(document.getElementById('preco-servico').value);
+
+        try {
+            // Tenta salvar o serviço na API
+            await api.post('/servicos', { 
+                nome: nome, 
+                preco: preco,
+                duracao_minutos: 30,
+                descricao: ""
+            });
+            
+            formNovoServico.reset();
+            await carregarServicos(); 
+            alert("Serviço cadastrado com sucesso!");
+            
+        } catch (e) {
+            console.error("Erro detalhado:", e);
+            // Mostra o erro exato na tela se o Python rejeitar
+            alert("Falha ao salvar. O servidor disse: " + (e.message || JSON.stringify(e)));
+        } finally {
+            btnSubmit.innerHTML = textoOriginal;
+        }
+    });
+}
+
+// Excluir Serviço
+window.excluirServico = async function(id) {
+    if(confirm("Deseja excluir este serviço? O site dos clientes também será atualizado.")) {
+        try {
+            await api.delete(`/servicos/${id}`);
+            await carregarServicos();
+        } catch(e) {
+            alert("Erro ao excluir o serviço.");
+        }
+    }
+};
+
+// ==========================================
+// 4. INICIAR O SISTEMA AO ABRIR A TELA
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    carregarResumo();
+    carregarAgendaDoDia();
+    carregarServicos();
+});
