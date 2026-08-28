@@ -199,7 +199,7 @@
                     const payload = {
                         cliente_nome: document.getElementById('cliente-nome').value,
                         cliente_telefone: document.getElementById('cliente-telefone').value,
-                        servico_id: parseInt(document.getElementById('cliente-servico').value),
+                        servico_id: document.getElementById('cliente-servico').value,
                         data_hora_inicio: `${data}T${hora}:00`
                     };
 
@@ -211,8 +211,14 @@
                         });
                         
                         if(!res.ok) {
-                            const errData = await res.json();
-                            throw new Error(errData.detail || "Erro na API");
+                            let erroMsg = "Erro na comunicação com a barbearia.";
+                            try {
+                                const errData = await res.json();
+                                erroMsg = errData.detail || erroMsg;
+                            } catch(pe) {
+                                erroMsg = "Erro interno no servidor de banco de dados.";
+                            }
+                            throw new Error(erroMsg);
                         }
                         
                         alert("Agendamento confirmado com sucesso! Te esperamos no horário marcado.");
