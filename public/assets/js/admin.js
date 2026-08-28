@@ -26,17 +26,27 @@ window.abrirCaixa = async function() {
     if (valorInicial && !isNaN(valorInicial.replace(',', '.'))) {
         const valorFormatado = parseFloat(valorInicial.replace(',', '.'));
         try {
-            await api.post('/financeiro/transacoes', {
-                tipo: "entrada",
-                categoria: "fundo_caixa",
-                valor: valorFormatado,
-                descricao: "Abertura de Caixa"
+            const res = await fetch('/api/financeiro/transacoes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo: "entrada",
+                    categoria: "outros", // Mudado para uma categoria genérica segura
+                    valor: valorFormatado,
+                    descricao: "Abertura de Caixa"
+                })
             });
+            
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || "Falha na comunicação com o servidor.");
+            }
+            
             document.getElementById("valor-caixa-abertura").textContent = formatarPreco(valorFormatado);
             document.getElementById("valor-caixa-abertura").classList.replace("text-gray-500", "text-white");
             alert("Caixa aberto com sucesso!");
         } catch (e) {
-            alert("Erro ao abrir caixa.");
+            alert("Erro ao abrir caixa: " + e.message);
         }
     }
 };
