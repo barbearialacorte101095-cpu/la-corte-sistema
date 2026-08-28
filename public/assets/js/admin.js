@@ -31,18 +31,13 @@ window.abrirCaixa = async function() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     tipo: "entrada",
-                    categoria: "dinheiro", // Usando categoria oficial do banco de dados
+                    categoria: "outro", // A palavra exata que a API exige
                     valor: valorFormatado,
                     descricao: "Abertura de Caixa (Fundo)"
                 })
             });
             
-            if (!res.ok) {
-                const err = await res.json();
-                // Pega a mensagem de erro mesmo se o Pydantic devolver uma lista
-                const msg = Array.isArray(err.detail) ? err.detail[0].msg : (err.detail || "Falha na comunicação");
-                throw new Error(msg);
-            }
+            if (!res.ok) throw new Error("A API recusou o formato.");
             
             document.getElementById("valor-caixa-abertura").textContent = formatarPreco(valorFormatado);
             document.getElementById("valor-caixa-abertura").classList.replace("text-gray-500", "text-white");
@@ -52,6 +47,8 @@ window.abrirCaixa = async function() {
         }
     }
 };
+
+// ... Mantenha as funções carregarAgendaDoDia e carregarDashboard exatamente como estão ...
 
 async function carregarAgendaDoDia() {
     try {
@@ -222,12 +219,13 @@ if (formPdv) {
         try {
             await api.post("/financeiro/transacoes", {
                 tipo: "entrada",
-                categoria: metodoPagamento,
+                categoria: "servico", // A palavra exata que a API exige
                 valor: valorServico,
-                descricao: nomeServico
+                descricao: `${nomeServico} (Pago no ${metodoPagamento})` // Salva como foi pago na descrição
             });
             formPdv.reset();
             await carregarDashboard(); 
+            alert("Venda registrada com sucesso!");
         } catch (erro) {
             alert("Erro ao registrar a venda.");
         } finally {

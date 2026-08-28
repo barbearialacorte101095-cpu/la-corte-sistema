@@ -19,15 +19,16 @@ async def listar_agendamentos(data: str = None):
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
                 if data:
-                    # Método 100% seguro: Transforma a data do banco em texto antes de buscar
+                    # Método seguro: busca tudo que for >= Hoje e < Amanhã
                     await cur.execute(
                         """
                         SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone 
                         FROM agendamentos 
-                        WHERE CAST(data_hora_inicio AS TEXT) LIKE %s
+                        WHERE data_hora_inicio >= %s::date 
+                        AND data_hora_inicio < %s::date + interval '1 day'
                         ORDER BY data_hora_inicio
                         """,
-                        (f"{data}%",)
+                        (data, data)
                     )
                 else:
                     await cur.execute("SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos ORDER BY data_hora_inicio")
@@ -36,16 +37,21 @@ async def listar_agendamentos(data: str = None):
                 agendamentos = []
                 for r in rows:
                     val = r[2]
-                    # Garante a formatação ISO do texto
-                    data_str = str(val).replace(' ', 'T') if val else None
+                    # Garante que o Javascript consiga ler a data, independente de como o banco devolver
+                    if isinstance(val, datetime):
+                        data_str = val.isoformat()
+                    elif val:
+                        data_str = str(val).replace(' ', 'T')
+                    else:
+                        data_str = None
 
                     agendamentos.append({
                         "id": str(r[0]),
                         "servico_id": str(r[1]) if r[1] else None,
                         "data_hora_inicio": data_str,
-                        "status": r[3],
-                        "cliente_nome": r[4] if r[4] else "Cliente",
-                        "cliente_telefone": r[5] if r[5] else ""
+                        "status": str(r[3]) if r[3] else "pendente",
+                        "cliente_nome": str(r[4]) if r[4] else "Cliente",
+                        "cliente_telefone": str(r[5]) if r[5] else ""
                     })
                 return agendamentos
     except Exception as e:
@@ -57,19 +63,31 @@ async def verificar_disponibilidade(data: str):
         pool = await get_pool()
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
-                # Busca as datas transformadas em texto para evitar quebra de contrato
                 await cur.execute(
-                    "SELECT data_hora_inicio FROM agendamentos WHERE CAST(data_hora_inicio AS TEXT) LIKE %s AND status != 'cancelado'",
-                    (f"{data}%",)
+                    """
+                    SELECT data_hora_inicio 
+                    FROM agendamentos 
+                    WHERE data_hora_inicio >= %s::date 
+                    AND data_hora_inicio < %s::date + interval '1 day' 
+                    AND status != 'cancelado'
+                    """,
+                    (data, data)
                 )
                 rows = await cur.fetchall()
                 
                 horarios_ocupados = []
                 for r in rows:
-                    if r[0]:
-                        # Corta e pega exatamente a string da hora (Ex: 2026-08-28 13:30 -> 13:30)
-                        hora = str(r[0]).replace('T', ' ').split(' ')[1][:5]
-                        horarios_ocupados.append(hora)
+                    val = r[0]
+                    if val:
+                        if isinstance(val, datetime):
+                            horarios_ocupados.append(val.strftime("%H:%M"))
+                        else:
+                            # Caso extremo: tenta fatiar com segurança se vier como texto
+                            val_str = str(val)
+                            if 'T' in val_str:
+                                horarios_ocupados.append(val_str.split('T')[1][:5])
+                            elif ' ' in val_str:
+                                horarios_ocupados.append(val_str.split(' ')[1][:5])
                 
                 horarios_disponiveis = []
                 hora_atual = datetime.strptime("09:00", "%H:%M")
