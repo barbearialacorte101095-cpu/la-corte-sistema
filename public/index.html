@@ -10,11 +10,11 @@
             theme: {
                 extend: {
                     colors: {
-                        'fundo': '#0a0c0a', /* Preto mais profundo */
-                        'fundo-card': '#131814', /* Fundo para os cards */
-                        'verde-jacare': '#153e1f', /* Verde escuro da logo */
-                        'verde-neon': '#32c759', /* Verde vibrante da logo */
-                        'prata': '#b3b8b5' /* Prata metálico */
+                        'fundo': '#0a0c0a',
+                        'fundo-card': '#131814',
+                        'verde-jacare': '#153e1f',
+                        'verde-neon': '#32c759',
+                        'prata': '#b3b8b5'
                     }
                 }
             }
@@ -23,57 +23,108 @@
 </head>
 <body class="bg-fundo text-white font-sans antialiased">
 
+    <!-- CABEÇALHO -->
     <header class="fixed w-full top-0 bg-fundo/95 backdrop-blur border-b border-verde-jacare z-50">
         <div class="max-w-6xl mx-auto px-6 py-2 flex justify-between items-center">
-            <!-- A SUA LOGO AQUI -->
-            <img src="/assets/img/logo.png" alt="La Corte Barbearia" class="h-16 md:h-20 object-contain">
+            <!-- Caminho da Logo Corrigido (Case Sensitive) -->
+            <img src="/assets/img/Logo-lacorte.png" alt="La Corte Barbearia" class="h-16 md:h-20 object-contain">
             
             <nav class="hidden md:flex gap-6">
                 <a href="#inicio" class="text-prata hover:text-verde-neon transition-colors uppercase tracking-wider text-sm font-bold">Início</a>
+                <a href="#experiencia" class="text-prata hover:text-verde-neon transition-colors uppercase tracking-wider text-sm font-bold">O Espaço</a>
                 <a href="#servicos" class="text-prata hover:text-verde-neon transition-colors uppercase tracking-wider text-sm font-bold">Agendar</a>
                 <a href="#localizacao" class="text-prata hover:text-verde-neon transition-colors uppercase tracking-wider text-sm font-bold">Localização</a>
             </nav>
-            <a href="https://wa.me/5521969390314" target="_blank" class="bg-verde-jacare hover:bg-green-900 text-white px-5 py-2 rounded font-bold uppercase tracking-wider text-xs transition-colors border border-verde-neon/30">
+            <a href="https://wa.me/5521969390314" target="_blank" class="bg-verde-jacare hover:bg-green-900 text-white px-5 py-2 rounded font-bold uppercase tracking-wider text-xs transition-colors border border-verde-neon/30 hidden md:block">
                 WhatsApp
             </a>
         </div>
     </header>
 
-    <section id="inicio" class="pt-32 pb-20 px-6 min-h-[80vh] flex flex-col justify-center items-center text-center bg-gradient-to-b from-fundo-card to-fundo">
-        <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-wider">
-            ESTILO E <span class="text-verde-neon">PRECISÃO</span>
-        </h2>
-        <p class="text-prata text-lg md:text-xl max-w-2xl mb-10">
-            A verdadeira experiência de barbearia tradicional alinhada com as tendências modernas. Cuide do seu visual com quem entende do assunto.
-        </p>
-        <a href="#servicos" class="bg-verde-neon hover:bg-green-500 text-fundo px-8 py-4 rounded font-black uppercase tracking-widest text-sm transition-colors shadow-[0_0_15px_rgba(50,199,89,0.3)] hover:shadow-[0_0_25px_rgba(50,199,89,0.6)]">
-            Agendar meu horário
-        </a>
+    <!-- HERO SECTION (COM BACKGROUND DE IMAGEM) -->
+    <section id="inicio" class="relative pt-32 pb-20 px-6 min-h-[85vh] flex flex-col justify-center items-center text-center overflow-hidden">
+        
+        <!-- Imagem de Fundo (barbershop4.jpg) com Máscara Escura -->
+        <div class="absolute inset-0 z-0">
+            <img src="/assets/img/barbershop4.jpg" alt="Interior da Barbearia La Corte" class="w-full h-full object-cover opacity-20">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-fundo/80 to-fundo"></div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="relative z-10 flex flex-col items-center">
+            <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-wider drop-shadow-2xl">
+                ESTILO E <span class="text-verde-neon">PRECISÃO</span>
+            </h2>
+            <p class="text-prata text-lg md:text-xl max-w-2xl mb-10 font-medium drop-shadow-md">
+                A verdadeira experiência de barbearia tradicional alinhada com as tendências modernas. Cuide do seu visual com quem entende do assunto.
+            </p>
+            <a href="#servicos" class="bg-verde-neon hover:bg-green-500 text-fundo px-10 py-5 rounded font-black uppercase tracking-widest text-sm transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(50,199,89,0.4)]">
+                Agendar meu horário
+            </a>
+        </div>
+    </section>
+
+    <!-- NOVA SEÇÃO: A EXPERIÊNCIA (GALERIA DE FOTOS) -->
+    <section id="experiencia" class="py-20 px-6 max-w-6xl mx-auto border-t border-verde-jacare">
+        <div class="text-center mb-16">
+            <h3 class="text-3xl font-bold uppercase tracking-wider mb-2">A Experiência La Corte</h3>
+            <div class="w-16 h-1 bg-verde-neon mx-auto"></div>
+            <p class="text-prata mt-4">Tradição, técnica impecável e um ambiente pensado para o seu conforto.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Foto 1: A Cadeira (barbershop1.jpg) -->
+            <div class="group overflow-hidden rounded-lg border border-verde-jacare shadow-xl relative">
+                <img src="/assets/img/barbershop1.jpg" alt="Conforto e Tradição" class="w-full h-72 object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out">
+                <div class="absolute inset-0 bg-gradient-to-t from-fundo-card/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-6">
+                    <span class="text-verde-neon font-bold uppercase tracking-widest text-sm">Conforto</span>
+                </div>
+            </div>
+            
+            <!-- Foto 2: Corte Tesoura (barbershop3.jpg) -->
+            <div class="group overflow-hidden rounded-lg border border-verde-jacare shadow-xl relative mt-0 md:mt-8">
+                <img src="/assets/img/barbershop3.jpg" alt="Corte na Tesoura" class="w-full h-72 object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out">
+                <div class="absolute inset-0 bg-gradient-to-t from-fundo-card/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-6">
+                    <span class="text-verde-neon font-bold uppercase tracking-widest text-sm">Técnica</span>
+                </div>
+            </div>
+            
+            <!-- Foto 3: Acabamento Navalha (barbershop2.jpg) -->
+            <div class="group overflow-hidden rounded-lg border border-verde-jacare shadow-xl relative">
+                <img src="/assets/img/barbershop2.jpg" alt="Acabamento Perfeito" class="w-full h-72 object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out">
+                <div class="absolute inset-0 bg-gradient-to-t from-fundo-card/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-6">
+                    <span class="text-verde-neon font-bold uppercase tracking-widest text-sm">Precisão</span>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- FORMULÁRIO DE AGENDAMENTO -->
     <section id="servicos" class="py-20 px-6 max-w-4xl mx-auto border-t border-verde-jacare">
         <div class="text-center mb-16">
-            <h3 class="text-3xl font-bold uppercase tracking-wider mb-2">Agende seu Horário</h3>
+            <h3 class="text-3xl font-bold uppercase tracking-wider mb-2">Garanta seu Lugar</h3>
             <div class="w-16 h-1 bg-verde-neon mx-auto"></div>
-            <p class="text-prata mt-4">Escolha o serviço e garanta seu lugar na fila.</p>
+            <p class="text-prata mt-4">Preencha os dados abaixo para entrar na nossa agenda inteligente.</p>
         </div>
         
-        <form id="form-agendamento-cliente" class="bg-fundo-card p-8 rounded-lg shadow-xl border border-verde-jacare flex flex-col gap-6">
+        <form id="form-agendamento-cliente" class="bg-fundo-card p-8 rounded-lg shadow-2xl border border-verde-jacare flex flex-col gap-6 relative overflow-hidden">
+            <!-- Detalhe visual de borda brilhante -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-verde-neon to-transparent opacity-50"></div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-verde-neon text-xs uppercase mb-2 font-bold">Seu Nome</label>
-                    <input type="text" id="cliente-nome" required class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:border-verde-neon focus:outline-none transition-colors">
+                    <input type="text" id="cliente-nome" required class="w-full bg-fundo border border-gray-700 rounded p-4 text-white focus:border-verde-neon focus:ring-1 focus:ring-verde-neon focus:outline-none transition-all">
                 </div>
                 <div>
                     <label class="block text-verde-neon text-xs uppercase mb-2 font-bold">WhatsApp (com DDD)</label>
-                    <input type="tel" id="cliente-telefone" required class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:border-verde-neon focus:outline-none transition-colors" placeholder="21 90000-0000">
+                    <input type="tel" id="cliente-telefone" required class="w-full bg-fundo border border-gray-700 rounded p-4 text-white focus:border-verde-neon focus:ring-1 focus:ring-verde-neon focus:outline-none transition-all" placeholder="21 90000-0000">
                 </div>
             </div>
 
             <div>
                 <label class="block text-verde-neon text-xs uppercase mb-2 font-bold">Qual o serviço de hoje?</label>
-                <select id="cliente-servico" required class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:border-verde-neon focus:outline-none transition-colors">
+                <select id="cliente-servico" required class="w-full bg-fundo border border-gray-700 rounded p-4 text-white focus:border-verde-neon focus:ring-1 focus:ring-verde-neon focus:outline-none transition-all">
                     <option value="" disabled selected>Carregando serviços...</option>
                 </select>
             </div>
@@ -81,63 +132,79 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-verde-neon text-xs uppercase mb-2 font-bold">Data</label>
-                    <input type="date" id="cliente-data" required class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:border-verde-neon focus:outline-none transition-colors">
+                    <input type="date" id="cliente-data" required class="w-full bg-fundo border border-gray-700 rounded p-4 text-white focus:border-verde-neon focus:ring-1 focus:ring-verde-neon focus:outline-none transition-all cursor-pointer">
                 </div>
                 <div>
                     <label class="block text-verde-neon text-xs uppercase mb-2 font-bold">Horário</label>
-                    <select id="cliente-hora" required class="w-full bg-fundo border border-gray-700 rounded p-3 text-white focus:border-verde-neon focus:outline-none disabled:opacity-50 transition-colors" disabled>
-                        <option value="" disabled selected>Selecione uma data primeiro</option>
+                    <select id="cliente-hora" required class="w-full bg-fundo border border-gray-700 rounded p-4 text-white focus:border-verde-neon focus:ring-1 focus:ring-verde-neon focus:outline-none disabled:opacity-50 transition-all cursor-pointer" disabled>
+                        <option value="" disabled selected>Selecione a data primeiro</option>
                     </select>
                 </div>
             </div>
 
-            <button type="submit" class="w-full bg-verde-neon hover:bg-green-500 text-fundo font-black py-4 rounded uppercase tracking-widest transition-colors mt-4">
+            <button type="submit" class="w-full bg-verde-neon hover:bg-green-500 text-fundo font-black py-5 rounded uppercase tracking-widest transition-all mt-4 shadow-lg hover:shadow-verde-neon/20">
                 Confirmar Agendamento
             </button>
         </form>
     </section>
 
     <!-- MAPA -->
-    <section id="localizacao" class="py-20 px-6 bg-fundo-card border-t border-verde-jacare">
-        <div class="max-w-6xl mx-auto">
+    <section id="localizacao" class="py-20 px-6 bg-fundo-card border-t border-verde-jacare relative">
+        <div class="max-w-6xl mx-auto relative z-10">
             <div class="text-center mb-16">
                 <h3 class="text-3xl font-bold uppercase tracking-wider mb-2">Onde Estamos</h3>
                 <div class="w-16 h-1 bg-verde-neon mx-auto"></div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-8">
-                    <div>
-                        <h4 class="text-verde-neon font-bold uppercase tracking-wider text-sm mb-2">Endereço</h4>
-                        <p class="text-prata text-lg">R. Cmte. Coelho, 850 - Cordovil<br>Rio de Janeiro - RJ, 21250-510</p>
+                <div class="space-y-10">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-verde-jacare p-3 rounded text-verde-neon border border-verde-neon/20">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold uppercase tracking-wider text-sm mb-1">Endereço</h4>
+                            <p class="text-prata text-lg">R. Cmte. Coelho, 850 - Cordovil<br>Rio de Janeiro - RJ, 21250-510</p>
+                        </div>
                     </div>
                     
-                    <div>
-                        <h4 class="text-verde-neon font-bold uppercase tracking-wider text-sm mb-2">Contato Direto</h4>
-                        <p class="text-white font-bold text-2xl mb-2">21 96939-0314</p>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-verde-jacare p-3 rounded text-verde-neon border border-verde-neon/20">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold uppercase tracking-wider text-sm mb-1">Contato Direto</h4>
+                            <p class="text-prata text-lg">21 96939-0314</p>
+                        </div>
                     </div>
                     
-                    <div>
-                        <h4 class="text-verde-neon font-bold uppercase tracking-wider text-sm mb-2">Funcionamento</h4>
-                        <p class="text-prata">Segunda a Sábado: 09:00 às 20:00<br>Domingo: Fechado</p>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-verde-jacare p-3 rounded text-verde-neon border border-verde-neon/20">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold uppercase tracking-wider text-sm mb-1">Funcionamento</h4>
+                            <p class="text-prata text-lg">Segunda a Sábado: 09:00 às 20:00<br>Domingo: Fechado</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="w-full h-80 lg:h-96 rounded-lg overflow-hidden border-2 border-verde-jacare shadow-[0_0_20px_rgba(21,62,31,0.5)]">
+                <div class="w-full h-96 rounded-xl overflow-hidden border border-verde-jacare shadow-[0_0_30px_rgba(21,62,31,0.6)] group">
                     <iframe 
                         src="https://maps.google.com/maps?q=R.+Cmte.+Coelho,+850+-+Cordovil,+Rio+de+Janeiro+-+RJ,+21250-510&t=&z=15&ie=UTF8&iwloc=&output=embed" 
-                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="filter grayscale contrast-125 group-hover:grayscale-0 transition-all duration-700">
                     </iframe>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="bg-fundo border-t border-verde-jacare py-8 text-center text-prata text-sm">
+    <footer class="bg-fundo border-t border-verde-jacare py-10 text-center text-prata text-sm">
+        <img src="/assets/img/Logo-lacorte.png" alt="La Corte" class="h-12 mx-auto mb-6 opacity-50 grayscale">
         <p>&copy; 2026 La Corte Barbearia. Todos os direitos reservados.</p>
     </footer>
 
-    <!-- LOGICA DO CLIENTE -->
+    <!-- LÓGICA DO CLIENTE -->
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -155,11 +222,15 @@
 
             const dataInput = document.getElementById('cliente-data');
             const horaSelect = document.getElementById('cliente-hora');
-            dataInput.min = new Date().toISOString().split('T')[0];
+            
+            // Fuso horário local para não bloquear o dia de hoje prematuramente
+            const hojeLocal = new Date();
+            hojeLocal.setMinutes(hojeLocal.getMinutes() - hojeLocal.getTimezoneOffset());
+            dataInput.min = hojeLocal.toISOString().split('T')[0];
 
             dataInput.addEventListener('change', async (e) => {
                 const dataEscolhida = e.target.value;
-                horaSelect.innerHTML = '<option value="" disabled selected>Buscando horários livres...</option>';
+                horaSelect.innerHTML = '<option value="" disabled selected>Buscando horários...</option>';
                 horaSelect.disabled = true;
 
                 try {
@@ -167,16 +238,16 @@
                     const horarios = await res.json();
 
                     if (horarios.length === 0) {
-                        horaSelect.innerHTML = '<option value="" disabled selected>Nenhum horário livre</option>';
+                        horaSelect.innerHTML = '<option value="" disabled selected>Esgotado para esta data</option>';
                     } else {
-                        horaSelect.innerHTML = '<option value="" disabled selected>Escolha um horário...</option>';
+                        horaSelect.innerHTML = '<option value="" disabled selected>Escolha o melhor horário...</option>';
                         horarios.forEach(h => {
                             horaSelect.innerHTML += `<option value="${h}">${h}</option>`;
                         });
                         horaSelect.disabled = false;
                     }
                 } catch (err) {
-                    horaSelect.innerHTML = '<option value="" disabled selected>Erro ao carregar</option>';
+                    horaSelect.innerHTML = '<option value="" disabled selected>Erro de conexão</option>';
                 }
             });
 
@@ -214,12 +285,12 @@
                             throw new Error(erroMsg);
                         }
                         
-                        alert("Agendamento confirmado com sucesso!");
+                        alert("✅ Agendamento confirmado com sucesso! Entrou na agenda.");
                         form.reset();
                         horaSelect.disabled = true;
-                        horaSelect.innerHTML = '<option value="" disabled selected>Selecione uma data primeiro</option>';
+                        horaSelect.innerHTML = '<option value="" disabled selected>Selecione a data primeiro</option>';
                     } catch(err) {
-                        alert("Erro ao agendar: " + err.message);
+                        alert("❌ Erro ao agendar: " + err.message);
                     } finally {
                         btn.innerHTML = textoOriginal;
                     }
