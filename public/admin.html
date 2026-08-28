@@ -13,7 +13,7 @@
                         'chumbo': '#121212',
                         'chumbo-claro': '#1E1E1E',
                         'verde-corte': '#1F4529',
-                        'verde-destaque': '#4FA184', /* Nova cor vibrante para textos */
+                        'verde-destaque': '#4FA184',
                         'prata': '#B0B0B0'
                     }
                 }
@@ -47,7 +47,7 @@
     <!-- ABA 1: FRENTE DE CAIXA -->
     <main id="aba-pdv" class="max-w-6xl mx-auto">
         
-        <!-- NOVO DASHBOARD -->
+        <!-- DASHBOARD (4 CARDS) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-verde-destaque shadow-lg">
                 <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Faturamento (Hoje)</h2>
@@ -72,39 +72,61 @@
             </div>
 
             <div class="bg-chumbo-claro p-6 rounded-lg border-l-4 border-gray-600 shadow-lg">
-                <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Faturamento (Mês)</h2>
+                <h2 class="text-prata text-xs uppercase tracking-wider mb-2">Fundo de Caixa</h2>
                 <div class="flex items-center justify-between">
-                    <span id="valor-faturamento-mes" class="text-2xl font-bold text-gray-500">...</span>
+                    <span id="valor-caixa-abertura" class="text-2xl font-bold text-gray-500">R$ 0,00</span>
+                    <button onclick="abrirCaixa()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs uppercase tracking-wider transition-colors">Abrir</button>
                 </div>
             </div>
         </div>
 
-        <div class="bg-chumbo-claro p-6 rounded-lg border-t-4 border-verde-corte shadow-lg">
-            <h2 class="text-prata font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
-                <span class="text-verde-destaque text-xl leading-none">+</span> Registrar Nova Venda
-            </h2>
-            <form id="form-pdv" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <div class="md:col-span-2">
-                    <label class="block text-prata text-xs uppercase mb-2">Serviço Realizado</label>
-                    <select id="pdv-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required>
-                        <option value="" disabled selected>Selecione um serviço...</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-prata text-xs uppercase mb-2">Pagamento</label>
-                    <select id="pdv-pagamento" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required>
-                        <option value="pix">Pix</option>
-                        <option value="cartao_credito">Cartão de Crédito</option>
-                        <option value="cartao_debito">Cartão de Débito</option>
-                        <option value="dinheiro">Dinheiro</option>
-                    </select>
-                </div>
-                <div>
-                    <button type="submit" class="w-full bg-verde-corte hover:bg-green-800 text-white font-bold py-3 px-4 rounded transition-colors uppercase tracking-widest text-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- COLUNA ESQUERDA: NOVA VENDA -->
+            <div class="lg:col-span-1 bg-chumbo-claro p-6 rounded-lg border-t-4 border-verde-corte shadow-lg self-start">
+                <h2 class="text-prata font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
+                    <span class="text-verde-destaque text-xl leading-none">+</span> Nova Venda
+                </h2>
+                <form id="form-pdv" class="flex flex-col gap-4">
+                    <div>
+                        <label class="block text-prata text-xs uppercase mb-2">Serviço</label>
+                        <select id="pdv-servico" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required>
+                            <option value="" disabled selected>Selecione...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-prata text-xs uppercase mb-2">Pagamento</label>
+                        <select id="pdv-pagamento" class="w-full bg-chumbo border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-verde-destaque" required>
+                            <option value="pix">Pix</option>
+                            <option value="dinheiro">Dinheiro</option>
+                            <option value="cartao_credito">Cartão de Crédito</option>
+                            <option value="cartao_debito">Cartão de Débito</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-verde-corte hover:bg-green-800 text-white font-bold py-3 px-4 rounded mt-2 transition-colors uppercase tracking-widest text-sm">
                         Receber
                     </button>
+                </form>
+            </div>
+
+            <!-- COLUNA DIREITA: FILA DE AGENDAMENTOS -->
+            <div class="lg:col-span-2 bg-chumbo-claro rounded-lg overflow-hidden shadow-lg border border-gray-800">
+                <div class="p-4 border-b border-gray-800 bg-chumbo flex justify-between items-center">
+                    <h2 class="text-prata font-bold uppercase tracking-wider">Fila de Hoje</h2>
+                    <span class="text-xs bg-verde-corte text-white px-2 py-1 rounded">Tempo Real</span>
                 </div>
-            </form>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-prata text-xs uppercase tracking-wider border-b border-gray-800">
+                            <th class="p-4">Horário</th>
+                            <th class="p-4">Cliente / Contato</th>
+                            <th class="p-4 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-fila-agendamentos">
+                        <tr><td colspan="3" class="p-4 text-center text-gray-500">Nenhum agendamento para hoje ainda.</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
@@ -145,7 +167,6 @@
         </div>
     </main>
 
-    <!-- Scripts -->
     <script>
         function mudarAba(abaId) {
             document.getElementById('aba-pdv').classList.add('hidden');
