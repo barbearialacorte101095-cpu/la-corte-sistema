@@ -18,44 +18,31 @@ async def listar_agendamentos(data: str = None):
         pool = await get_pool()
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
-                if data:
-                    # Usa o CAST do SQL para ler qualquer formato e converte direto na fonte
-                    await cur.execute(
-                        """
-                        SELECT id, servico_id, CAST(data_hora_inicio AS TEXT), status, cliente_nome, cliente_telefone 
-                        FROM agendamentos 
-                        WHERE CAST(data_hora_inicio AS TEXT) LIKE %s
-                        ORDER BY data_hora_inicio
-                        """,
-                        (f"{data}%",)
-                    )
-                else:
-                    await cur.execute(
-                        """
-                        SELECT id, servico_id, CAST(data_hora_inicio AS TEXT), status, cliente_nome, cliente_telefone 
-                        FROM agendamentos 
-                        ORDER BY data_hora_inicio
-                        """
-                    )
-                
+                # Puxa tudo sem filtros complexos no SQL
+                await cur.execute("SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos ORDER BY data_hora_inicio")
                 rows = await cur.fetchall()
-                agendamentos = []
-                for r in rows:
-                    val = r[2]
-                    if val:
-                        data_str = str(val).replace(' ', 'T')
-                    else:
-                        data_str = None
-
-                    agendamentos.append({
-                        "id": str(r[0]),
-                        "servico_id": str(r[1]) if r[1] else None,
-                        "data_hora_inicio": data_str,
-                        "status": str(r[3]) if r[3] else "pendente",
-                        "cliente_nome": str(r[4]) if r[4] else "Cliente",
-                        "cliente_telefone": str(r[5]) if r[5] else ""
-                    })
-                return agendamentos
+                
+        agendamentos = []
+        for r in rows:
+            dt_str = str(r[2]) if r[2] else ""
+            
+            # Garante que tem pelo menos o tamanho de uma data (YYYY-MM-DD)
+            if len(dt_str) >= 10:
+                data_do_banco = dt_str[:10] 
+                
+                # O Filtro blindado no Python
+                if data and data_do_banco != data:
+                    continue
+                    
+            agendamentos.append({
+                "id": str(r[0]),
+                "servico_id": str(r[1]) if r[1] else None,
+                "data_hora_inicio": dt_str.replace(' ', 'T') if dt_str else None,
+                "status": str(r[3]) if r[3] else "pendente",
+                "cliente_nome": str(r[4]) if r[4] else "Cliente",
+                "cliente_telefone": str(r[5]) if r[5] else ""
+            })
+        return agendamentos
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao listar: {str(e)}")
 
@@ -65,32 +52,33 @@ async def verificar_disponibilidade(data: str):
         pool = await get_pool()
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
-                # O SUBSTRING do SQL extrai diretamente a hora. Ex: "2026-08-30 15:30:00" vira "15:30"
-                await cur.execute(
-                    """
-                    SELECT SUBSTRING(CAST(data_hora_inicio AS TEXT) FROM 12 FOR 5)
-                    FROM agendamentos 
-                    WHERE CAST(data_hora_inicio AS TEXT) LIKE %s 
-                    AND status != 'cancelado'
-                    """,
-                    (f"{data}%",)
-                )
+                await cur.execute("SELECT data_hora_inicio, status FROM agendamentos")
                 rows = await cur.fetchall()
                 
-                # Pega as horas blindadas e limpas (já filtrando valores nulos)
-                horarios_ocupados = [str(r[0]) for r in rows if r[0]]
+        horarios_ocupados = []
+        for r in rows:
+            if str(r[1]) == 'cancelado':
+                continue
                 
-                horarios_disponiveis = []
-                hora_atual = datetime.strptime("09:00", "%H:%M")
-                hora_fim = datetime.strptime("19:30", "%H:%M")
-                
-                while hora_atual <= hora_fim:
-                    str_hora = hora_atual.strftime("%H:%M")
-                    if str_hora not in horarios_ocupados:
-                        horarios_disponiveis.append(str_hora)
-                    hora_atual += timedelta(minutes=30)
-                    
-                return horarios_disponiveis
+            dt_str = str(r[0]) if r[0] else ""
+            if len(dt_str) >= 16:
+                data_do_banco = dt_str[:10]
+                if data_do_banco == data:
+                    # Fatiamento cirúrgico da hora (ex: 2026-08-28 15:30 -> 15:30)
+                    hora_do_banco = dt_str[11:16]
+                    horarios_ocupados.append(hora_do_banco)
+        
+        horarios_disponiveis = []
+        hora_atual = datetime.strptime("09:00", "%H:%M")
+        hora_fim = datetime.strptime("19:30", "%H:%M")
+        
+        while hora_atual <= hora_fim:
+            str_hora = hora_atual.strftime("%H:%M")
+            if str_hora not in horarios_ocupados:
+                horarios_disponiveis.append(str_hora)
+            hora_atual += timedelta(minutes=30)
+            
+        return horarios_disponiveis
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro na disponibilidade: {str(e)}")
 
