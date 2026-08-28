@@ -19,32 +19,30 @@ async def listar_agendamentos(data: str = None):
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
                 if data:
-                    # O TO_CHAR força o banco a entregar a data já formatada como texto limpo
+                    # Método 100% seguro: Transforma a data do banco em texto antes de buscar
                     await cur.execute(
                         """
-                        SELECT id, servico_id, TO_CHAR(data_hora_inicio, 'YYYY-MM-DD"T"HH24:MI:SS'), status, cliente_nome, cliente_telefone 
+                        SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone 
                         FROM agendamentos 
-                        WHERE data_hora_inicio::date = %s::date 
+                        WHERE CAST(data_hora_inicio AS TEXT) LIKE %s
                         ORDER BY data_hora_inicio
                         """,
-                        (data,)
+                        (f"{data}%",)
                     )
                 else:
-                    await cur.execute(
-                        """
-                        SELECT id, servico_id, TO_CHAR(data_hora_inicio, 'YYYY-MM-DD"T"HH24:MI:SS'), status, cliente_nome, cliente_telefone 
-                        FROM agendamentos 
-                        ORDER BY data_hora_inicio
-                        """
-                    )
+                    await cur.execute("SELECT id, servico_id, data_hora_inicio, status, cliente_nome, cliente_telefone FROM agendamentos ORDER BY data_hora_inicio")
                 
                 rows = await cur.fetchall()
                 agendamentos = []
                 for r in rows:
+                    val = r[2]
+                    # Garante a formatação ISO do texto
+                    data_str = str(val).replace(' ', 'T') if val else None
+
                     agendamentos.append({
                         "id": str(r[0]),
                         "servico_id": str(r[1]) if r[1] else None,
-                        "data_hora_inicio": str(r[2]) if r[2] else None,
+                        "data_hora_inicio": data_str,
                         "status": r[3],
                         "cliente_nome": r[4] if r[4] else "Cliente",
                         "cliente_telefone": r[5] if r[5] else ""
@@ -59,13 +57,19 @@ async def verificar_disponibilidade(data: str):
         pool = await get_pool()
         async with pool.connection() as conn:
             async with conn.cursor() as cur:
-                # O TO_CHAR extrai apenas a Hora e o Minuto direto no banco
+                # Busca as datas transformadas em texto para evitar quebra de contrato
                 await cur.execute(
-                    "SELECT TO_CHAR(data_hora_inicio, 'HH24:MI') FROM agendamentos WHERE data_hora_inicio::date = %s::date AND status != 'cancelado'",
-                    (data,)
+                    "SELECT data_hora_inicio FROM agendamentos WHERE CAST(data_hora_inicio AS TEXT) LIKE %s AND status != 'cancelado'",
+                    (f"{data}%",)
                 )
                 rows = await cur.fetchall()
-                horarios_ocupados = [r[0] for r in rows if r[0]]
+                
+                horarios_ocupados = []
+                for r in rows:
+                    if r[0]:
+                        # Corta e pega exatamente a string da hora (Ex: 2026-08-28 13:30 -> 13:30)
+                        hora = str(r[0]).replace('T', ' ').split(' ')[1][:5]
+                        horarios_ocupados.append(hora)
                 
                 horarios_disponiveis = []
                 hora_atual = datetime.strptime("09:00", "%H:%M")

@@ -31,15 +31,17 @@ window.abrirCaixa = async function() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     tipo: "entrada",
-                    categoria: "outros", // Mudado para uma categoria genérica segura
+                    categoria: "dinheiro", // Usando categoria oficial do banco de dados
                     valor: valorFormatado,
-                    descricao: "Abertura de Caixa"
+                    descricao: "Abertura de Caixa (Fundo)"
                 })
             });
             
             if (!res.ok) {
                 const err = await res.json();
-                throw new Error(err.detail || "Falha na comunicação com o servidor.");
+                // Pega a mensagem de erro mesmo se o Pydantic devolver uma lista
+                const msg = Array.isArray(err.detail) ? err.detail[0].msg : (err.detail || "Falha na comunicação");
+                throw new Error(msg);
             }
             
             document.getElementById("valor-caixa-abertura").textContent = formatarPreco(valorFormatado);
